@@ -1,0 +1,10 @@
+.DS_Store
+**/__pycache__/
+.idea/
+.venv/
+venv/
+.tox/
+dist/
+*.egg-info/
+*.pyc
+arcane_viewer/assets/default.json

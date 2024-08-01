@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:bx="https://boxy-svg.com">
+  <defs>
+    <filter id="shadow" bx:pinned="true">
+      <title>Drop Shadow</title>
+      <feDropShadow result="drop-shadow-0" in="SourceGraphic" style="flood-opacity: 0.3;" stdDeviation="10" dx="0" dy="10"/>
+    </filter>
+    <bx:guide x="-10" y="100" angle="90"/>
+    <bx:guide x="100" y="-10" angle="0"/>
+    <bx:guide x="924" y="-10" angle="0"/>
+    <bx:guide x="-10" y="924" angle="90"/>
+    <clipPath id="clip-0">
+      <path style="stroke-width: 3px; fill: rgb(255, 255, 255);" d="M 100 724 L 100 300 C 100 185.001 170 99.995 300.026 100 L 724 99.995 C 854 100 924 185.001 924 300 L 924 724 C 924 839.001 854 923.995 724 924 L 300.026 924 C 170 924 100 839.001 100 724 Z">
+        <title>Icon Mask</title>
+      </path>
+    </clipPath>
+    <symbol id="symbol-0" viewBox="0 0 1024 1024" bx:pinned="true">
+      <title>App Icon Guides</title>
+      <g style="" transform="matrix(1, 0, 0, 1, 0, 0)">
+        <title>App Icon Guides</title>
+        <path style="fill: none; stroke: rgb(145, 145, 145); stroke-width: 3px;" d="M 0 739.001 L 0 285.001 C 0 135.001 112 0 284.999 0 L 739.001 0 C 912 0 1024 135.001 1024 285.001 L 1024 739.001 C 1024 889.001 912 1024 739.001 1024 L 284.999 1024 C 112 1024 0 889.001 0 739.001 Z">
+          <title>Outer Bounding Box</title>
+        </path>
+        <path style="stroke: rgb(145, 145, 145); fill: none; stroke-width: 3px;" d="M 50 739.001 L 50 285.001 C 50 162 140 50 284.999 50 L 739.001 50 C 884.001 50 974 162 974 285.001 L 974 739.001 C 974 862 884.001 974 739.001 974 L 284.999 974 C 140 974 50 862 50 739.001 Z">
+          <title>Inner Bounding Box</title>
+        </path>
+        <path style="fill: none; stroke: rgb(255, 0, 0); stroke-width: 3px;" d="M 100 724.005 L 100 300.005 C 100 185.006 170 100 300.026 100.005 L 724 100 C 854 100.005 924 185.006 924 300.005 L 924 724.005 C 924 839.006 854 924 724 924.005 L 300.026 924.005 C 170 924.005 100 839.006 100 724.005 Z">
+          <title>Icon Grid Bounding Box</title>
+        </path>
+        <path style="fill: none; stroke: rgb(255, 0, 0);" d="M 154.017 870.001 L 870.001 870.001 L 870.001 154.014 L 154.017 154.014 L 154.017 870.001 Z M 154.017 870.001 L 870.001 154.014 L 154.017 870.001 Z M 100 511.995 L 924 511.995 L 100 511.995 Z M 100 669.36 L 924 669.36 L 100 669.36 Z M 924 354.631 L 100 354.631 L 924 354.631 Z M 669.365 99.995 L 669.365 923.995 L 669.365 99.995 Z M 354.635 923.995 L 354.635 99.995 L 354.635 923.995 Z M 512 99.995 L 512 923.995 L 512 99.995 Z M 154.017 154.014 L 870.001 870.001 L 154.017 154.014 Z">
+          <title>Icon Grid</title>
+        </path>
+        <circle style="fill: none; stroke: rgba(255, 0, 0, 0.6);" cx="512" cy="511.995" r="157.397">
+          <title>Grid Circle 1</title>
+        </circle>
+        <circle style="fill: none; stroke: rgba(255, 0, 0, 0.6);" cx="512" cy="511.995" r="222.577">
+          <title>Grid Circle 2</title>
+        </circle>
+        <circle style="fill: none; stroke: rgba(255, 0, 0, 0.6);" cx="512" cy="511.995" r="358.001">
+          <title>Grid Circle 3</title>
+        </circle>
+        <path d="M 1084.343 548.001 L 143.343 548.001 C 114.624 548.001 91.343 524.72 91.343 496.001 C 91.343 467.282 114.624 444.001 143.343 444.001 L 1084.343 444.001 C 1113.062 444.001 1136.343 467.282 1136.343 496.001 C 1136.343 524.72 1113.062 548.001 1084.343 548.001 Z M 1136.3 496.039 L 91.3 495.961" style="stroke-width: 5px; fill: rgba(0, 195, 255, 0.37); stroke: rgb(0, 119, 255); stroke-dasharray: 24, 10;" transform="matrix(0.430444, -0.902617, 0.902617, 0.430444, -98.093403, 836.54613)">
+          <title>Tool Angle</title>
+        </path>
+      </g>
+    </symbol>
+  </defs>
+  <g style="filter: url(#shadow);">
+    <title>App Icon (w/ Shadow)</title>
+    <g style="clip-path: url(#clip-0);">
+      <title>Background (Masked)</title>
+      <path style="stroke-width: 3px; fill: rgb(255, 255, 255);" d="M 100 724 L 100 300 C 100 185.001 170 99.995 300.026 100 L 724 99.995 C 854 100 924 185.001 924 300 L 924 724 C 924 839.001 854 923.995 724 924 L 300.026 924 C 170 924 100 839.001 100 724 Z">
+        <title>Icon Shape</title>
+      </path>
+    </g>
+    <rect x="683.9" y="337.289" width="619.799" height="80.511" style="fill: rgb(174, 187, 187); stroke: rgba(0, 0, 0, 0.42);" transform="matrix(0.430445, -0.902617, 0.902617, 0.430445, -72.962265, 1061.280029)"/>
+  </g>
+  <use width="1024" height="1024" transform="matrix(1, 0, 0, 1, 0.000001, 0.000001)" style="pointer-events: none;" xlink:href="#symbol-0">
+    <title>App Icon Guides</title>
+  </use>
+</svg>
