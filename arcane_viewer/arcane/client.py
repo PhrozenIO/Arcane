@@ -78,7 +78,7 @@ class Client:
         while True:
             try:
                 b = self.conn.recv(1)
-            except:
+            except ssl.SSLError:
                 break
 
             if not b:
