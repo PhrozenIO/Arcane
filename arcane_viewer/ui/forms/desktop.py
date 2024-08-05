@@ -159,26 +159,32 @@ class DesktopWindow(QMainWindow):
             local_screen = QApplication.primaryScreen()
 
         local_screen_size = local_screen.size()
+        remote_screen_width = int(screen.width / local_screen.devicePixelRatio())
+        remote_screen_height = int(screen.height / local_screen.devicePixelRatio())
 
-        if local_screen_size.width() <= screen.width or local_screen_size.height() <= screen.height:
+        # Calculate the new width and height of the virtual desktop window
+        if local_screen_size.width() <= remote_screen_width or local_screen_size.height() <= remote_screen_height:
             adjust_vertically = local_screen_size.width() > local_screen_size.height()
 
             if adjust_vertically:
                 new_width = round((local_screen_size.width() * arcane.VD_WINDOW_ADJUST_RATIO) / 100)
-                resized_ratio = round(new_width * 100 / screen.width)
-                new_height = round((screen.height * resized_ratio) / 100)
+                resized_ratio = round(new_width * 100 / remote_screen_width)
+                new_height = round((remote_screen_height * resized_ratio) / 100)
             else:
                 new_height = round((local_screen_size.height() * arcane.VD_WINDOW_ADJUST_RATIO) / 100)
-                resized_ratio = round(new_height * 100 / screen.height)
-                new_width = round((screen.width * resized_ratio) / 100)
+                resized_ratio = round(new_height * 100 / remote_screen_height)
+                new_width = round((remote_screen_width * resized_ratio) / 100)
+        else:
+            new_width = remote_screen_width
+            new_height = remote_screen_height
 
-            # Resize the window
-            self.setGeometry(
-                local_screen.geometry().left() + (local_screen_size.width() - new_width) // 2,
-                local_screen.geometry().top() + (local_screen_size.height() - new_height) // 2,
-                new_width,
-                new_height
-            )
+        # Resize and place the window
+        self.setGeometry(
+            local_screen.geometry().left() + (local_screen_size.width() - new_width) // 2,
+            local_screen.geometry().top() + (local_screen_size.height() - new_height) // 2,
+            new_width,
+            new_height
+        )
 
         # We can now start our events thread
         # TODO: 0001
