@@ -28,11 +28,7 @@ import arcane_viewer.ui.forms as arcane_forms
 
 
 def main():
-    logging.basicConfig()
-
-    logging.root.setLevel(logging.NOTSET)
-
-    logging.basicConfig(level=logging.NOTSET)
+    logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
     app = QApplication(sys.argv)
 

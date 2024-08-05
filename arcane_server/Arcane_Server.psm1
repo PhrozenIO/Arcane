@@ -142,7 +142,7 @@ Add-Type @"
     }
 "@
 
-$global:ArcaneVersion = "1.0.0b1"
+$global:ArcaneVersion = "1.0.0b2"
 $global:ArcaneProtocolVersion = "5.0.0b1"
 
 $global:HostSyncHash = [HashTable]::Synchronized(@{

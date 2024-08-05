@@ -44,8 +44,6 @@ class ClientBaseThread(QThread):
 
         self.client = self.session.claim_client()
         try:
-            logging.info("Establish New Remote Desktop Connection...")
-
             self.client.write_line("AttachToSession")
 
             self.client.write_line(self.session.session_id)
