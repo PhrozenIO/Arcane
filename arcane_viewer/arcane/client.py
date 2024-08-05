@@ -65,8 +65,6 @@ class Client:
 
         logger.info(f"[{self.conn.fileno()}] Connected! Authenticating with remote server...")
 
-        self.stream = self.conn.makefile('rwb')
-
         self.authenticate(password)
 
         logger.info("Authentication successful")
@@ -75,11 +73,25 @@ class Client:
         self.close()
 
     def read_line(self):
-        return self.stream.readline().decode('utf-8').strip()
+        data = b""
+
+        while True:
+            try:
+                b = self.conn.recv(1)
+            except:
+                break
+
+            if not b:
+                break
+
+            data += b
+            if b == b'\n':
+                break
+
+        return data.decode('utf-8').strip()
 
     def write_line(self, line: str):
-        self.stream.write(line.encode('utf-8') + b'\r\n')
-        self.stream.flush()
+        self.conn.write(line.encode('utf-8') + b'\r\n')
 
     def read_json(self):
         try:
@@ -117,14 +129,15 @@ class Client:
             )
 
     def close(self):
-        logger.info(f"[{self.conn.fileno()}] Closing connection...")
-
         if self.client is not None:
+            logger.info(f"[{self.conn.fileno()}] Closing connection...")
             try:
                 self.conn.shutdown(socket.SHUT_RDWR)
-
                 self.conn.close()
             except OSError:
                 self.client.close()
 
                 pass
+            finally:
+                self.conn = None
+                self.client = None

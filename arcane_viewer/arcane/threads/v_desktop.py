@@ -72,9 +72,21 @@ class VirtualDesktopThread(ClientBaseThread):
             self.selected_screen
         )
 
+        packet_max_size = self.session.option_packet_size.value
         while self._running:
-            chunk_size, x, y = struct.unpack('III', self.client.stream.read(12))
-            chunk_bytes = QByteArray(self.client.stream.read(chunk_size))
+            chunk_size, x, y = struct.unpack('III', self.client.conn.read(12))
+
+            chunk_bytes = QByteArray()
+            bytes_read = 0
+            while bytes_read < chunk_size:
+                packet_size = min(packet_max_size, chunk_size - bytes_read)
+                b = self.client.conn.recv(packet_size)
+                if not b:
+                    break
+
+                bytes_read += len(b)
+
+                chunk_bytes.append(b)
 
             chunk = QImage()
             chunk.loadFromData(chunk_bytes)
