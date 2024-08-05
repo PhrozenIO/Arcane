@@ -1,4 +1,4 @@
-![Main Logo](resources/images/banner.png)
+![Main Logo](https://raw.githubusercontent.com/PhrozenIO/Arcane/main/resources/images/banner.png)
 
 # Arcane (βeta)
 
@@ -10,7 +10,7 @@ The client/viewer is a cross-platform application developed in Python, using the
 
 The project was renamed to Arcane to avoid the generic nature of the previous name and to signify a major step in the project's development: the complete rewrite of the viewer to be cross-platform.
 
-[![Demo Video](resources/images/video.png)](https://www.youtube.com/watch?v=h6xePrsIcQY)
+[![Demo Video](https://raw.githubusercontent.com/PhrozenIO/Arcane/main/resources/images/video.png)](https://www.youtube.com/watch?v=h6xePrsIcQY)
 
 > Arcane is currently in beta and is not recommended for production environments. Some features are still missing but will soon be integrated into the project. For example, clipboard synchronization, which was available in PowerRemoteDesktop, has not yet been implemented but will be added shortly. I want to take the necessary time, with the help of the community, to ensure that the current features are stable and reliable before focusing on additional content and functionalities.
 
@@ -37,6 +37,15 @@ The project was renamed to Arcane to avoid the generic nature of the previous na
 
 * And more...
 
+## Version Table
+
+| Version | Protocol Version | Release Date   |
+|---------|------------------|----------------|
+| 1.0.0b1 | 5.0.0b1          | 01 August 2024 |
+| 1.0.0b2 | 5.0.0b1          | 05 August 2024 |
+
+> You can use any version of the viewer with any version of the server, as long as the protocol version matches. The protocol version ensures compatibility between the viewer and the server.
+
 ## Components
 
 ### Arcane Viewer
@@ -49,7 +58,13 @@ python -m venv venv
 source venv/bin/activate
 ```
 
-Next, download the latest release from the official repository and install it using pip:
+You can either install the official package from PyPi.org:
+
+```bash
+pip install arcane-viewer
+```
+
+or download the latest release from the official repository and install it using pip:
 
 ```bash
 pip install path/to/your/downloaded/whl/file
@@ -65,15 +80,30 @@ arcane-viewer
 
 #### Fast Use
 
+The easiest way to install and run the server is by installing the PowerShell module from the PowerShell Gallery:
+
+> Please note that you must have administrative privileges to install a new module. To do this, open an elevated PowerShell prompt and execute the following command:
+
 ```powershell
-Invoke-Expression -Command (Get-Content "Arcane_Server.psm1" -Raw)
-# or
 Install-Module -Name Arcane_Server
 ```
+
+Before running the server, you must import the module into your PowerShell session:
+
+> Please note that depending on your system configuration, you may need to run the following command to temporarily bypass the execution policy in order to run an unsigned script:
+> `powershell.exe -executionpolicy bypass`
+
+```powershell
+Import-Module Arcane_Server
+```
+
+Once the module is installed, you can run the server using the following command:
     
 ```powershell
 Invoke-ArcaneServer
 ```
+
+That's it, you're ready to go! 🚀
 
 #### Available Module Functions
 
@@ -159,8 +189,17 @@ base64 -i /tmp/phrozen.p12
 
 You can then pass the output base64 certificate file to parameter `EncodedCertificate` (One line)
 
+## Change Log
+
+### Version 1.0.0 (Beta 2)
+
+- [x] The issue of the Arcane Viewer Virtual Desktop Window freezing when manually closing the connection with Remote Desktop has now been fixed.
+- [x] The Arcane Viewer Virtual Desktop Window now has an icon on the taskbar.
+- [x] HDPI and scaling support have been improved.
+- [x] Arcane Viewer Virtual Desktop Window placement has been improved.
+
 ---
 
 I’m dedicating this project to the amazing HackTheBox France Meetup community! 🇫🇷
 
-![HackTheBox Meetup France](resources/images/htb_france.png)
+![HackTheBox Meetup France](https://raw.githubusercontent.com/PhrozenIO/Arcane/main/resources/images/htb_france.png)
