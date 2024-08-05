@@ -39,9 +39,13 @@ class DesktopWindow(QMainWindow):
     universe_collapsed = False
 
     def __init__(self, parent, session):
-        super().__init__(parent)
+        super().__init__()
 
         self.session = session
+
+        # Instead of using QWidget parent property, we will use a custom attribute to store the parent window, this will
+        # prevent icon to disappear on Windows taskbar when a parent is set to a Window but parent is hidden.
+        self.parent = parent
 
         # Set Window Properties, Layout, Title, Icon and Size
         self.setWindowTitle("🖥 {} ({}) :: {} {}".format(
@@ -105,8 +109,8 @@ class DesktopWindow(QMainWindow):
     def showEvent(self, event):
         super().showEvent(event)
 
-        if self.parent() is not None:
-            self.parent().hide()
+        if self.parent is not None:
+            self.parent.hide()
 
     def closeEvent(self, event):
         """ Overridden close method to handle the cleanup
@@ -127,8 +131,8 @@ class DesktopWindow(QMainWindow):
 
             event.accept()
 
-            if self.parent() is not None:
-                self.parent().show()
+            if self.parent is not None:
+                self.parent.show()
         else:
             event.ignore()
 
