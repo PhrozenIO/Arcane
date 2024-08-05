@@ -1,8 +1,13 @@
+from pathlib import Path
+
 from setuptools import find_packages, setup
+
+this_directory = Path(__file__).parent
+long_description = (this_directory / "README.md").read_text()
 
 setup(
     name='arcane_viewer',
-    version='1.0.0b1',
+    version='1.0.0b2',
     packages=find_packages(),
     include_package_data=True,
     install_requires=[
@@ -22,4 +27,6 @@ setup(
     keywords="remote desktop, remote control, remote access, remote administration, remote assistance, powershell",
     url="https://github.com/PhrozenIO/Arcane",
     python_requires='>=3.6',
+    long_description=long_description,
+    long_description_content_type='text/markdown',
 )
