@@ -34,11 +34,11 @@ class VirtualDesktopThread(ClientBaseThread):
     request_screen_selection = pyqtSignal(list)
     chunk_received = pyqtSignal(QImage, int, int)
 
-    selected_screen = None
-    event_loop = None
-
     def __init__(self, session: arcane.Session):
         super().__init__(session, arcane.WorkerKind.Desktop)
+
+        self.selected_screen = None
+        self.event_loop = None
 
     """`Destruction is a form of creation. So the fact they burn the money is ironic. They just want to see what happens
      when they tear the world apart. They want to change things.`, Donnie Darko"""

@@ -14,7 +14,7 @@
 import logging
 from abc import abstractmethod
 
-from PyQt6.QtCore import QThread, pyqtSignal, pyqtSlot
+from PyQt6.QtCore import QEventLoop, QThread, pyqtSignal, pyqtSlot
 
 import arcane_viewer.arcane as arcane
 
@@ -24,9 +24,6 @@ logger = logging.getLogger(__name__)
 class ClientBaseThread(QThread):
     """ Base class for all client threads """
     thread_finished = pyqtSignal(bool)
-
-    selected_screen = None
-    event_loop = None
 
     """`Destruction is a form of creation. So the fact they burn the money is ironic. They just want to see what happens
      when they tear the world apart. They want to change things.`, Donnie Darko"""
@@ -41,18 +38,8 @@ class ClientBaseThread(QThread):
 
     def run(self):
         on_error = False
-
-        self.client = self.session.claim_client()
         try:
-            self.client.write_line("AttachToSession")
-
-            self.client.write_line(self.session.session_id)
-
-            response = self.client.read_line()
-            if response != "ResourceFound":
-                raise arcane.ArcaneProtocolException(arcane.ArcaneProtocolError.ResourceNotFound)
-
-            self.client.write_line(self.worker_kind.name)
+            self.client = self.session.claim_client(self.worker_kind)
 
             self._connected = True
 

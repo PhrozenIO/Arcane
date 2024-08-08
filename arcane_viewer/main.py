@@ -63,6 +63,19 @@ def main():
                 left: 8px;
                 top: 8px;
             }
+            
+            QLabel#fingerprint {
+                background-color: rgb(42, 42, 42);
+                padding: 4px;
+                border-radius: 4px;
+            }
+            
+            QLabel#alert-warning {
+                background-color: #d0b650;
+                color: #564917;
+                padding: 4px;
+                border-radius: 4px;    
+            }
         """)
 
     # Create and show the connect window

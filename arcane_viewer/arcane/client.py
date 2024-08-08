@@ -61,6 +61,15 @@ class Client:
 
         self.conn.connect((server_address, server_port))
 
+        server_certificate = self.conn.getpeercert(binary_form=True)
+        if server_certificate is None:
+            raise arcane.ArcaneProtocolException(
+                arcane.ArcaneProtocolError.MissingServerCertificate
+            )
+
+        self.server_fingerprint = hashlib.sha1(server_certificate).hexdigest().upper()
+        logger.debug(f"Server certificate fingerprint: `{self.server_fingerprint}`")
+
         self.conn.settimeout(None)
 
         logger.info(f"[{self.conn.fileno()}] Connected! Authenticating with remote server...")

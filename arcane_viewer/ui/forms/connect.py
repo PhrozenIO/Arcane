@@ -15,13 +15,15 @@ import json
 import os.path
 import socket
 
-from PyQt6.QtCore import Qt, pyqtSlot
-from PyQt6.QtWidgets import (QComboBox, QGridLayout, QGroupBox, QHBoxLayout,
-                             QLabel, QLineEdit, QMainWindow, QMessageBox,
-                             QPushButton, QSpinBox, QVBoxLayout, QWidget)
+from PyQt6.QtCore import Qt, pyqtSlot, QSettings
+from PyQt6.QtWidgets import (QComboBox, QDialog, QGridLayout, QGroupBox,
+                             QHBoxLayout, QLabel, QLineEdit, QMainWindow,
+                             QMessageBox, QPushButton, QSpinBox, QVBoxLayout,
+                             QWidget)
 
 import arcane_viewer.arcane as arcane
 import arcane_viewer.arcane.threads as arcane_threads
+import arcane_viewer.ui.dialogs as arcane_dialogs
 import arcane_viewer.ui.forms as arcane_forms
 import arcane_viewer.ui.utilities as utilities
 
@@ -29,13 +31,13 @@ import arcane_viewer.ui.utilities as utilities
 class ConnectWindow(QMainWindow, utilities.CenterWindow):
     """ Connect Window to establish a connection to the server """
 
-    __connect_thread = None
-    __connecting_form = None
-    desktop_window = None
-    session = None
-
     def __init__(self):
         super().__init__()
+
+        self.__connect_thread = None
+        self.__connecting_form = None
+        self.desktop_window = None
+        self.session = None
 
         self.setWindowTitle(f"{arcane.APP_DISPLAY_NAME} :: Connect")
 
@@ -221,7 +223,7 @@ class ConnectWindow(QMainWindow, utilities.CenterWindow):
         self.setFixedSize(350, self.sizeHint().height())
 
     def show_about_dialog(self):
-        about_window = arcane_forms.AboutWindow(self)
+        about_window = arcane_dialogs.AboutWindow(self)
         about_window.exec()
 
     def get_packet_size_option(self):
@@ -239,7 +241,7 @@ class ConnectWindow(QMainWindow, utilities.CenterWindow):
 
     @pyqtSlot()
     def connect_thread_started(self):
-        self.__connecting_form = arcane_forms.ConnectingWindow(self)
+        self.__connecting_form = arcane_dialogs.ConnectingWindow(self)
         self.__connecting_form.exec()
 
     @pyqtSlot(object)
@@ -252,6 +254,20 @@ class ConnectWindow(QMainWindow, utilities.CenterWindow):
             return
 
         self.session = session
+
+        # Show Server Certificate Dialog if certificate is not (yet) trusted
+        settings = QSettings(arcane.APP_ORGANIZATION_NAME, arcane.APP_NAME)
+        trusted_certificates = settings.value("trusted_certificates", [])
+
+        if session.server_fingerprint not in trusted_certificates:
+            server_certificate_dialog = arcane_dialogs.ServerCertificateDialog(self, session.server_fingerprint)
+            signal = server_certificate_dialog.exec()
+            if signal == QDialog.DialogCode.Rejected:
+                return
+
+            if server_certificate_dialog.trust_certificate_checkbox.isChecked():
+                trusted_certificates.append(session.server_fingerprint)
+                settings.setValue("trusted_certificates", trusted_certificates)
 
         # Assign Advanced Options
         self.session.option_packet_size = self.get_packet_size_option()
