@@ -49,7 +49,7 @@ class DesktopWindow(QMainWindow):
 
         # Set Window Properties, Layout, Title, Icon and Size
         self.setWindowTitle("🖥 {} ({}) :: {} {}".format(
-            arcane.APP_NAME,
+            arcane.APP_DISPLAY_NAME,
             session.server_address,
             session.display_name,
             "- View Only" if session.presentation else ""

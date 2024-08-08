@@ -37,7 +37,7 @@ class ConnectWindow(QMainWindow, utilities.CenterWindow):
     def __init__(self):
         super().__init__()
 
-        self.setWindowTitle(f"{arcane.APP_NAME} :: Connect")
+        self.setWindowTitle(f"{arcane.APP_DISPLAY_NAME} :: Connect")
 
         self.setWindowFlags(
             Qt.WindowType.CustomizeWindowHint |

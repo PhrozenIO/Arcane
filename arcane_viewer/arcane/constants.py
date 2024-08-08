@@ -33,7 +33,10 @@ else:
 
 # Constants or hard-coded values
 APP_VERSION = "1.0.0"
-APP_NAME = f"Arcane {APP_VERSION} (βeta)"
+APP_NAME = "Arcane"
+APP_ORGANIZATION_NAME = "Phrozen"
+APP_DISPLAY_NAME = f"{APP_NAME} {APP_VERSION} (βeta)"
+
 VD_WINDOW_ADJUST_RATIO = 90
 
 DEFAULT_JSON = os.path.join(get_asset_file("default.json"))
