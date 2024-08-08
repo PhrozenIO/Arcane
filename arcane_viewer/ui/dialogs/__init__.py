@@ -6,6 +6,7 @@ __license__ = "Apache License 2.0"
 
 from .about import AboutWindow
 from .connecting import ConnectingWindow
+from .options import OptionsDialog
 from .screen_selection import ScreenSelectionWindow
 from .server_certificate import ServerCertificateDialog
 
@@ -14,4 +15,5 @@ __all__ = [
     'ConnectingWindow',
     'ScreenSelectionWindow',
     'ServerCertificateDialog',
+    'OptionsDialog',
 ]

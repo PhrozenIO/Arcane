@@ -7,6 +7,9 @@ __license__ = "Apache License 2.0"
 from .client import Client
 from .constants import (APP_DISPLAY_NAME, APP_ICON, APP_NAME,
                         APP_ORGANIZATION_NAME, APP_VERSION, DEFAULT_JSON,
+                        SETTINGS_KEY_BLOCK_SIZE, SETTINGS_KEY_IMAGE_QUALITY,
+                        SETTINGS_KEY_PACKET_SIZE,
+                        SETTINGS_KEY_TRUSTED_CERTIFICATES,
                         VD_WINDOW_ADJUST_RATIO)
 from .exceptions import ArcaneProtocolError, ArcaneProtocolException
 from .protocol import (PROTOCOL_VERSION, ArcaneProtocolCommand, BlockSize,
@@ -39,4 +42,8 @@ __all__ = [
     'VD_WINDOW_ADJUST_RATIO',
     'APP_VERSION',
     'DEFAULT_JSON',
+    'SETTINGS_KEY_TRUSTED_CERTIFICATES',
+    'SETTINGS_KEY_IMAGE_QUALITY',
+    'SETTINGS_KEY_PACKET_SIZE',
+    'SETTINGS_KEY_BLOCK_SIZE',
 ]

@@ -57,12 +57,12 @@ def main():
     # Apply custom stylesheet
     app.setStyleSheet("""
             QGroupBox::title {
-                background-color: rgb(42, 42, 42);
+                background-color: rgb(53, 53, 53);
                 padding: 4px 8px 4px 8px;
                 border-radius: 4px;
                 left: 8px;
                 top: 8px;
-            }
+            }        
             
             QLabel#fingerprint {
                 background-color: rgb(42, 42, 42);

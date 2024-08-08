@@ -31,13 +31,22 @@ else:
             return str(asset_path)
 
 
-# Constants or hard-coded values
-APP_VERSION = "1.0.0"
+# Application Information
+APP_VERSION = "1.0.0b3"
 APP_NAME = "Arcane"
 APP_ORGANIZATION_NAME = "Phrozen"
 APP_DISPLAY_NAME = f"{APP_NAME} {APP_VERSION} (βeta)"
 
+# Remote Desktop Engine Hardcoded Values
 VD_WINDOW_ADJUST_RATIO = 90
 
+# Assets absolute paths
 DEFAULT_JSON = os.path.join(get_asset_file("default.json"))
 APP_ICON = os.path.join(get_asset_file("app_icon.png"))
+
+# Settings Key Names
+SETTINGS_KEY_TRUSTED_CERTIFICATES = "trusted_certificates"
+SETTINGS_KEY_IMAGE_QUALITY = "image_quality"
+SETTINGS_KEY_PACKET_SIZE = "packet_size"
+SETTINGS_KEY_BLOCK_SIZE = "block_size"
+

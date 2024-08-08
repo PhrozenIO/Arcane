@@ -15,11 +15,11 @@ import json
 import os.path
 import socket
 
-from PyQt6.QtCore import Qt, pyqtSlot, QSettings
-from PyQt6.QtWidgets import (QComboBox, QDialog, QGridLayout, QGroupBox,
-                             QHBoxLayout, QLabel, QLineEdit, QMainWindow,
-                             QMessageBox, QPushButton, QSpinBox, QVBoxLayout,
-                             QWidget)
+from PyQt6.QtCore import QSettings, QSize, Qt, pyqtSlot
+from PyQt6.QtGui import QIcon
+from PyQt6.QtWidgets import (QDialog, QHBoxLayout, QLabel, QLineEdit,
+                             QMainWindow, QMessageBox, QPushButton, QSpinBox,
+                             QVBoxLayout, QWidget)
 
 import arcane_viewer.arcane as arcane
 import arcane_viewer.arcane.threads as arcane_threads
@@ -55,9 +55,23 @@ class ConnectWindow(QMainWindow, utilities.CenterWindow):
         core_layout = QVBoxLayout()
         self.central_widget.setLayout(core_layout)
 
+        # Setup Form Layout (Containing both Logo and Inputs)
+        form_layout = QHBoxLayout()
+        core_layout.addLayout(form_layout)
+
+        # Logo
+        icon = QLabel(self)
+        icon.setPixmap(QIcon(arcane.APP_ICON).pixmap(QSize(96, 96)))
+        icon.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        form_layout.addWidget(icon)
+
+        # Form Inputs
+        form_input_layout = QVBoxLayout()
+        form_layout.addLayout(form_input_layout)
+
         # Server Address Form Input
         self.server_address_label = QLabel("Server Address / Port:")
-        core_layout.addWidget(self.server_address_label)
+        form_input_layout.addWidget(self.server_address_label)
 
         server_address_layout = QHBoxLayout()
 
@@ -78,72 +92,28 @@ class ConnectWindow(QMainWindow, utilities.CenterWindow):
         server_address_layout.setStretch(1, 0)
         server_address_layout.setStretch(2, 2)
 
-        core_layout.addLayout(server_address_layout)
+        form_input_layout.addLayout(server_address_layout)
 
-        core_layout.addSpacing(4)
+        form_input_layout.addSpacing(4)
 
         # Password Form Input
         self.password_label = QLabel("Password:")
-        core_layout.addWidget(self.password_label)
+        form_input_layout.addWidget(self.password_label)
 
         self.password_input = QLineEdit()
         self.password_input.setEchoMode(QLineEdit.EchoMode.Password)
 
-        core_layout.addWidget(self.password_input)
-
-        core_layout.addSpacing(4)
-
-        # Advanced Settings (Fieldset)
-        advanced_settings_group = QGroupBox("Advanced Settings")
-        advanced_settings_group_layout = QGridLayout()
-        advanced_settings_group.setLayout(advanced_settings_group_layout)
-        core_layout.addWidget(advanced_settings_group)
-
-        advanced_settings_group_layout.setContentsMargins(8, 16, 8, 8)
-
-        # Virtual Desktop Image Quality
-        image_quality_label = QLabel("Image Quality:")
-
-        self.image_quality_input = QSpinBox()
-        self.image_quality_input.setMinimum(10)
-        self.image_quality_input.setMaximum(100)
-        self.image_quality_input.setValue(80)
-
-        # Packet Size (Optimization)
-        packet_size_label = QLabel("Packet Size:")
-        self.packet_size_input = QComboBox()
-        for value in arcane.PacketSize:
-            self.packet_size_input.addItem(value.display_name, userData=value)
-
-        self.packet_size_input.setCurrentIndex(2)  # Default to 4096 bytes
-
-        # Block Size (Optimization)
-        block_size_label = QLabel("Block Size:")
-        self.block_size_input = QComboBox()
-        for value in arcane.BlockSize:
-            self.block_size_input.addItem(value.display_name, userData=value)
-
-        self.block_size_input.setCurrentIndex(1)  # Default to 64x64
-
-        # Place Inputs in our Grid Layout
-        advanced_settings_group_layout.addWidget(image_quality_label, 0, 0)
-        advanced_settings_group_layout.addWidget(self.image_quality_input, 0, 1)
-
-        advanced_settings_group_layout.addWidget(packet_size_label, 1, 0)
-        advanced_settings_group_layout.addWidget(self.packet_size_input, 1, 1)
-
-        advanced_settings_group_layout.addWidget(block_size_label, 2, 0)
-        advanced_settings_group_layout.addWidget(self.block_size_input, 2, 1)
+        form_input_layout.addWidget(self.password_input)
 
         # Give Breath to Action Buttons
-        core_layout.addSpacing(6)
+        form_input_layout.addSpacing(6)
 
         # Action Buttons
         self.about_button = QPushButton("About")
         self.about_button.clicked.connect(self.show_about_dialog)
 
-        self.cancel_button = QPushButton("Cancel")
-        self.cancel_button.clicked.connect(lambda: self.close())
+        self.options_button = QPushButton("Options")
+        self.options_button.clicked.connect(lambda: arcane_dialogs.OptionsDialog(self).exec())
 
         self.connect_button = QPushButton("Connect")
         self.connect_button.clicked.connect(self.submit_form)
@@ -151,7 +121,7 @@ class ConnectWindow(QMainWindow, utilities.CenterWindow):
 
         action_layout = QHBoxLayout()
         action_layout.addWidget(self.about_button)
-        action_layout.addWidget(self.cancel_button)
+        action_layout.addWidget(self.options_button)
         action_layout.addWidget(self.connect_button)
 
         core_layout.addLayout(action_layout)
@@ -226,15 +196,6 @@ class ConnectWindow(QMainWindow, utilities.CenterWindow):
         about_window = arcane_dialogs.AboutWindow(self)
         about_window.exec()
 
-    def get_packet_size_option(self):
-        return self.packet_size_input.currentData()
-
-    def get_block_size_option(self):
-        return self.block_size_input.currentData()
-
-    def get_image_quality_option(self):
-        return self.image_quality_input.value()
-
     @pyqtSlot(str)
     def session_error(self, error_message):
         QMessageBox.critical(self, "Error", error_message)
@@ -257,7 +218,7 @@ class ConnectWindow(QMainWindow, utilities.CenterWindow):
 
         # Show Server Certificate Dialog if certificate is not (yet) trusted
         settings = QSettings(arcane.APP_ORGANIZATION_NAME, arcane.APP_NAME)
-        trusted_certificates = settings.value("trusted_certificates", [])
+        trusted_certificates = settings.value(arcane.SETTINGS_KEY_TRUSTED_CERTIFICATES, [])
 
         if session.server_fingerprint not in trusted_certificates:
             server_certificate_dialog = arcane_dialogs.ServerCertificateDialog(self, session.server_fingerprint)
@@ -267,12 +228,12 @@ class ConnectWindow(QMainWindow, utilities.CenterWindow):
 
             if server_certificate_dialog.trust_certificate_checkbox.isChecked():
                 trusted_certificates.append(session.server_fingerprint)
-                settings.setValue("trusted_certificates", trusted_certificates)
+                settings.setValue(arcane.SETTINGS_KEY_TRUSTED_CERTIFICATES, trusted_certificates)
 
-        # Assign Advanced Options
-        self.session.option_packet_size = self.get_packet_size_option()
-        self.session.option_block_size = self.get_block_size_option()
-        self.session.option_image_quality = self.get_image_quality_option()
+        # Assign Remote Desktop Options
+        self.session.option_image_quality = settings.value(arcane.SETTINGS_KEY_IMAGE_QUALITY, 80)
+        self.session.option_packet_size = settings.value(arcane.SETTINGS_KEY_PACKET_SIZE, arcane.PacketSize.Size4096)
+        self.session.option_block_size = settings.value(arcane.SETTINGS_KEY_BLOCK_SIZE, arcane.BlockSize.Size64)
 
         # Show the Remote Desktop Window
         self.desktop_window = arcane_forms.DesktopWindow(self, self.session)
