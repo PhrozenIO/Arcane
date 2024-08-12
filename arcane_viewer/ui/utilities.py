@@ -13,7 +13,10 @@
 
 from typing import Union
 
+from PyQt6.QtGui import QFont
 from PyQt6.QtWidgets import QDialog, QMainWindow
+
+MONOSPACE_FONTS = QFont("Consolas, 'Courier New', Monaco, 'DejaVu Sans Mono', 'Liberation Mono', monospace")
 
 
 class CenterWindow:

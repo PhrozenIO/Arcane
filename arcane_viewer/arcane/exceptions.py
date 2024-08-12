@@ -19,6 +19,9 @@ class ArcaneProtocolError(Enum):
     ResourceNotFound = auto()
     InvalidStructureData = auto()
     UnsupportedVersion = auto()
+    MissingServerCertificate = auto()
+    MissingSession = auto()
+    ServerFingerprintTampered = auto()
 
 
 class ArcaneProtocolException(Exception):
@@ -29,6 +32,12 @@ class ArcaneProtocolException(Exception):
             ArcaneProtocolError.AuthenticationFailed: "Authentication failed",
             ArcaneProtocolError.ResourceNotFound: "A resource was not found",
             ArcaneProtocolError.InvalidStructureData: "Invalid structure data, whether corrupted or missing properties",
+            ArcaneProtocolError.UnsupportedVersion: "Unsupported protocol version: protocol versions between client and"
+                                                    "server do not match",
+            ArcaneProtocolError.MissingServerCertificate: "Server certificate is missing",
+            ArcaneProtocolError.MissingSession: "Session is missing, you must request a session first",
+            ArcaneProtocolError.ServerFingerprintTampered: "Server fingerprint has changed, confidentiality is possibly"
+                                                           " compromised",
         }
 
         super().__init__(error_messages.get(reason, "Unknown error"))

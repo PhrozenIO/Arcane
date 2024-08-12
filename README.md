@@ -39,10 +39,11 @@ The project was renamed to Arcane to avoid the generic nature of the previous na
 
 ## Version Table
 
-| Version | Protocol Version | Release Date   |
-|---------|------------------|----------------|
-| 1.0.0b1 | 5.0.0b1          | 01 August 2024 |
-| 1.0.0b2 | 5.0.0b1          | 05 August 2024 |
+| Version        | Protocol Version | Release Date   |
+|----------------|------------------|----------------|
+| 1.0.0b1 (Beta) | 5.0.0b1          | 01 August 2024 |
+| 1.0.0b2 (Beta) | 5.0.0b1          | 05 August 2024 |
+| 1.0.3 (Beta)   | 5.0.0b1          | 12 August 2024 |
 
 > You can use any version of the viewer with any version of the server, as long as the protocol version matches. The protocol version ensures compatibility between the viewer and the server.
 
@@ -189,7 +190,30 @@ base64 -i /tmp/phrozen.p12
 
 You can then pass the output base64 certificate file to parameter `EncodedCertificate` (One line)
 
+## Viewer Screenshots
+
+### Main Window
+
+![Main Window](https://raw.githubusercontent.com/PhrozenIO/Arcane/main/resources/images/screenshots/main.png)
+
+### Server Fingerprint Validation
+
+![Server Fingerprint](https://raw.githubusercontent.com/PhrozenIO/Arcane/main/resources/images/screenshots/server_fingerprint.png)
+
+### Settings Window
+
+![Remote Desktop](https://raw.githubusercontent.com/PhrozenIO/Arcane/main/resources/images/screenshots/options_rd.png)
+
+![Server Trusted Certificates](https://raw.githubusercontent.com/PhrozenIO/Arcane/main/resources/images/screenshots/options_tc.png)
+
 ## Change Log
+
+### Version 1.0.3 (Beta)
+
+- [x] The connection window interface has been streamlined, with additional options now accessible in a dedicated settings window.
+- [x] Server certificate validation has been introduced. When connecting to a server for the first time, users will be prompted to trust the certificate and can choose to remember their decision.
+- [x] A new settings window has been implemented, offering support for additional remote desktop parameters and managing trusted server certificates, including options to add, edit, and remove certificates.
+- [x] Various code refactoring and structural improvements have been made to enhance the overall performance and maintainability of the application.
 
 ### Version 1.0.0 (Beta 2)
 

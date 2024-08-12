@@ -34,11 +34,11 @@ class VirtualDesktopThread(ClientBaseThread):
     request_screen_selection = pyqtSignal(list)
     chunk_received = pyqtSignal(QImage, int, int)
 
-    selected_screen = None
-    event_loop = None
-
     def __init__(self, session: arcane.Session):
         super().__init__(session, arcane.WorkerKind.Desktop)
+
+        self.selected_screen = None
+        self.event_loop = None
 
     """`Destruction is a form of creation. So the fact they burn the money is ironic. They just want to see what happens
      when they tear the world apart. They want to change things.`, Donnie Darko"""
@@ -54,6 +54,14 @@ class VirtualDesktopThread(ClientBaseThread):
 
         logger.info(f"Screen: {self.selected_screen.name} "
                     f"({self.selected_screen.width}x{self.selected_screen.height})")
+
+        print({
+                "ScreenName": self.selected_screen.name,
+                "ImageCompressionQuality": self.session.option_image_quality,
+                "PacketSize": self.session.option_packet_size.value,
+                "BlockSize": self.session.option_block_size.value,
+                "LogonUI": False,  # TODO: 0001
+            })
 
         self.client.write_json(
             {

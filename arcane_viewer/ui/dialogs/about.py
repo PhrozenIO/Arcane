@@ -26,7 +26,7 @@ class AboutWindow(QDialog, utilities.CenterWindow):
     def __init__(self, parent):
         super().__init__(parent)
 
-        self.setWindowTitle(f"About {arcane.APP_NAME}")
+        self.setWindowTitle(f"About {arcane.APP_DISPLAY_NAME}")
 
         self.setWindowFlags(
             Qt.WindowType.Dialog |
@@ -46,7 +46,7 @@ class AboutWindow(QDialog, utilities.CenterWindow):
         core_layout.addWidget(avatar)
 
         # About Author / Project
-        text = QLabel(f"<h1>{arcane.APP_NAME}</h1>"
+        text = QLabel(f"<h1>{arcane.APP_DISPLAY_NAME}</h1>"
                       f"<p><b>Protocol Version:</b> {arcane.PROTOCOL_VERSION}</p>"
                       f"<p><b>Python:</b> {sys.version.split()[0]} / <b>PyQt6: </b>{QT_VERSION_STR}</p>"
                       "<p>🇫🇷 Jean-Pierre LESUEUR (<a href=\"https://twitter.com/darkcodersc\">@DarkCoderSc</a>)</p>"

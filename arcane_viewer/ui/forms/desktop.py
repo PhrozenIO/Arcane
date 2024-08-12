@@ -25,21 +25,21 @@ from PyQt6.QtWidgets import (QApplication, QGraphicsPixmapItem, QMainWindow,
 import arcane_viewer.arcane as arcane
 import arcane_viewer.arcane.threads as arcane_threads
 import arcane_viewer.ui.custom_widgets as arcane_widgets
-import arcane_viewer.ui.forms as arcane_forms
+import arcane_viewer.ui.dialogs as arcane_dialogs
 
 logger = logging.getLogger(__name__)
 
 
 class DesktopWindow(QMainWindow):
-    tangent_universe = None
-    scene_pixmap = None
-    v_desktop = None
-    desktop_thread = None
-    events_thread = None
-    universe_collapsed = False
-
     def __init__(self, parent, session):
         super().__init__()
+
+        self.tangent_universe = None
+        self.scene_pixmap = None
+        self.v_desktop = None
+        self.desktop_thread = None
+        self.events_thread = None
+        self.universe_collapsed = False
 
         self.session = session
 
@@ -49,7 +49,7 @@ class DesktopWindow(QMainWindow):
 
         # Set Window Properties, Layout, Title, Icon and Size
         self.setWindowTitle("🖥 {} ({}) :: {} {}".format(
-            arcane.APP_NAME,
+            arcane.APP_DISPLAY_NAME,
             session.server_address,
             session.display_name,
             "- View Only" if session.presentation else ""
@@ -135,8 +135,6 @@ class DesktopWindow(QMainWindow):
                 self.parent.show()
         else:
             event.ignore()
-
-        super().closeEvent(event)
 
     def open_cellar_door(self, screen):
         """ Initialize the virtual desktop (Tangent Universe) """
@@ -239,7 +237,7 @@ class DesktopWindow(QMainWindow):
     @pyqtSlot(list)
     def display_screen_selection_dialog(self, screens):
         """ Display screen selection dialog """
-        screen_selection_dialog = arcane_forms.ScreenSelectionWindow(self, screens)
+        screen_selection_dialog = arcane_dialogs.ScreenSelectionWindow(self, screens)
         screen_selection_dialog.accepted.connect(lambda: self.desktop_thread.on_screen_selection_dialog_closed(
             screen_selection_dialog.get_selected_screen()
         ))

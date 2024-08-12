@@ -20,10 +20,6 @@ logger = logging.getLogger(__name__)
 
 
 class Session:
-    option_image_quality = 80
-    option_packet_size = arcane.PacketSize.Size9216
-    option_block_size = arcane.BlockSize.Size64
-
     """ Session class to handle remote session """
     def __init__(self, server_address: str, server_port: int, password: str):
         self.server_address = server_address
@@ -33,15 +29,47 @@ class Session:
         self.session_id = None
         self.display_name = None
         self.presentation = False
+        self.server_fingerprint = None
+
+        self.option_image_quality = 80
+        self.option_packet_size = arcane.PacketSize.Size9216
+        self.option_block_size = arcane.BlockSize.Size64
 
         self.request_session()
 
-    def claim_client(self):
-        return arcane.Client(self.server_address, self.server_port, self.__password)
+    def claim_client(self, worker_kind: arcane.WorkerKind = None):
+        """ Establish a new TLS connection to the remote server and authenticate. Optionally we can specify a worker
+        to be attached to the current session """
+        client = arcane.Client(self.server_address, self.server_port, self.__password)
+
+        # If a session is already established and a worker kind is provided, we attach to current session a new worker
+        if worker_kind is not None:
+            if self.session_id is None:
+                raise arcane.ArcaneProtocolException(arcane.ArcaneProtocolError.MissingSession)
+
+            # If the server fingerprint has changed after session creation, we may be facing a MITM attack,
+            # Abort connection
+            if self.server_fingerprint != client.server_fingerprint:
+                raise arcane.ArcaneProtocolException(arcane.ArcaneProtocolError.ServerFingerprintTampered)
+
+            client.write_line("AttachToSession")
+
+            client.write_line(self.session_id)
+
+            response = client.read_line()
+            if response != "ResourceFound":
+                raise arcane.ArcaneProtocolException(arcane.ArcaneProtocolError.ResourceNotFound)
+
+            client.write_line(worker_kind.name)
+
+        return client
 
     def request_session(self):
+        """ Request a new session to the remote server """
         client = self.claim_client()
         try:
+            self.server_fingerprint = client.server_fingerprint
+
             client.write_line("RequestSession")
 
             session_information = client.read_json()

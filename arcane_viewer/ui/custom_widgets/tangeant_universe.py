@@ -34,9 +34,6 @@ class TangentUniverse(QGraphicsView):
     diverging veil? When the cosmic mirror distorts, do you walk the ordained spiral or the fragmented loop of the
     twilight realm?`"""
 
-    events_thread = None
-    screen = None
-
     def __init__(self):
         super().__init__()
 
@@ -44,6 +41,9 @@ class TangentUniverse(QGraphicsView):
         self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
         self.setMouseTracking(True)
+
+        self.events_thread = None
+        self.screen = None
 
         self.scene = QGraphicsScene()
         self.setScene(self.scene)
