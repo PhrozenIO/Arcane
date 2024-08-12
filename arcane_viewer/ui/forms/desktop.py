@@ -136,8 +136,6 @@ class DesktopWindow(QMainWindow):
         else:
             event.ignore()
 
-        super().closeEvent(event)
-
     def open_cellar_door(self, screen):
         """ Initialize the virtual desktop (Tangent Universe) """
         self.v_desktop = QPixmap(screen.size())
