@@ -2,14 +2,12 @@ from pathlib import Path
 
 from setuptools import find_packages, setup
 
-import arcane_viewer.arcane as arcane
-
 this_directory = Path(__file__).parent
 long_description = (this_directory / "README.md").read_text()
 
 setup(
     name='arcane_viewer',
-    version=arcane.APP_VERSION,
+    version='1.0.3',
     packages=find_packages(),
     include_package_data=True,
     install_requires=[

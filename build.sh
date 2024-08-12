@@ -2,7 +2,21 @@
 
 # Jean-Pierre LESUEUR (@DarkCoderSc)
 # Description: Build Arcane Viewer Package
-# Date: 2024-08-01
+# Date: 2024-08-12
+
+preflight_question() {
+  local question="$1"
+
+  echo "$question ? [y/N]"
+
+  read -r response
+  response=$(echo "$response" | tr '[:upper:]' '[:lower:]')
+
+  if [ "$response" != "y" ]; then
+    echo "(!) Please do it!"
+    exit 1
+  fi
+}
 
 # arg: --skip-tox
 skip_tox=false
@@ -26,6 +40,10 @@ for arg in "$@"; do
       ;;
   esac
 done
+
+# Preflight checks
+preflight_question "Have you updated the arcane_viewer.arcane.constants.APP_VERSION"
+preflight_question "Is this version reflected on the setup.py"
 
 # Clean up things
 echo "Cleaning up things..."
