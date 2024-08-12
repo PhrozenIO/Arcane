@@ -14,7 +14,7 @@
 import logging
 from abc import abstractmethod
 
-from PyQt6.QtCore import QEventLoop, QThread, pyqtSignal, pyqtSlot
+from PyQt6.QtCore import QThread, pyqtSignal, pyqtSlot
 
 import arcane_viewer.arcane as arcane
 

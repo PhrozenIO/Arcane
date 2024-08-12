@@ -228,7 +228,14 @@ class ConnectWindow(QMainWindow, utilities.CenterWindow):
 
             if server_certificate_dialog.trust_certificate_checkbox.isChecked():
                 trusted_certificates.append(session.server_fingerprint)
+
+                # Save trusted certificates to settings store
                 settings.setValue(arcane.SETTINGS_KEY_TRUSTED_CERTIFICATES, trusted_certificates)
+
+                # Save extra information about the certificate (Default)
+                settings.setValue(f"{arcane.SETTINGS_KEY_TRUSTED_CERTIFICATES}.{session.server_fingerprint}", {
+                    "display_name": session.display_name,
+                })
 
         # Assign Remote Desktop Options
         self.session.option_image_quality = settings.value(arcane.SETTINGS_KEY_IMAGE_QUALITY, 80)

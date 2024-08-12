@@ -56,26 +56,43 @@ def main():
 
     # Apply custom stylesheet
     app.setStyleSheet("""
-            QGroupBox::title {
-                background-color: rgb(53, 53, 53);
-                padding: 4px 8px 4px 8px;
-                border-radius: 4px;
-                left: 8px;
-                top: 8px;
-            }        
-            
-            QLabel#fingerprint {
-                background-color: rgb(42, 42, 42);
-                padding: 4px;
-                border-radius: 4px;
-            }
-            
-            QLabel#alert-warning {
-                background-color: #d0b650;
-                color: #564917;
-                padding: 4px;
-                border-radius: 4px;    
-            }
+        QGroupBox::title {
+            background-color: rgb(53, 53, 53);
+            padding: 4px 8px 4px 8px;
+            border-radius: 4px;
+            left: 8px;
+            top: 8px;
+        }
+
+        QLabel#fingerprint {
+            background-color: rgb(42, 42, 42);
+            padding: 4px;
+            border-radius: 4px;
+        }
+
+        QLabel#alert-warning {
+            background-color: #d0b650;
+            color: #564917;
+            padding: 4px;
+            border-radius: 4px;
+        }
+
+        QHeaderView::section {
+            height: 26px;
+        }
+
+        QTabBar::tab {
+            height: 26px;
+        }
+
+        QPushButton#danger {
+            background-color: darkred;
+        }
+
+        QPushButton:disabled {
+            background-color: #444444;
+            color: #777777;
+        }
         """)
 
     # Create and show the connect window

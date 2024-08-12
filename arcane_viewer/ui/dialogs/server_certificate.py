@@ -34,9 +34,7 @@ class ServerCertificateDialog(QDialog, utilities.CenterWindow):
 
         # Certificate Information
         certificate_info_label = QLabel("Please ensure the following fingerprint (SHA-1) matches the expected server "
-                                        "fingerprint. If it does not, do not proceed with the connection, there may be "
-                                        "a security risk, and someone might be attempting to intercept your connection."
-                                        )
+                                        "fingerprint.")
 
         certificate_info_label.setObjectName("alert-warning")
         certificate_info_label.setWordWrap(True)
@@ -47,8 +45,10 @@ class ServerCertificateDialog(QDialog, utilities.CenterWindow):
 
         self.fingerprint = fingerprint
 
-        core_layout.addLayout(self.setup_fingerprint_layout(0, 20))
-        core_layout.addLayout(self.setup_fingerprint_layout(20, 40))
+        core_layout.addLayout(self.setup_fingerprint_layout(0, 10))
+        core_layout.addLayout(self.setup_fingerprint_layout(10, 20))
+        core_layout.addLayout(self.setup_fingerprint_layout(20, 30))
+        core_layout.addLayout(self.setup_fingerprint_layout(30, 40))
 
         core_layout.addSpacing(8)
 
@@ -86,7 +86,9 @@ class ServerCertificateDialog(QDialog, utilities.CenterWindow):
             layout.addWidget(label)
 
             if index < len(line) - 1:
-                layout.addWidget(QLabel(" : "))
+                label = QLabel(" : ")
+                label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+                layout.addWidget(label)
 
         return layout
 
