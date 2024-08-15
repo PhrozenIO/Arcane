@@ -12,7 +12,7 @@ The project was renamed to Arcane to avoid the generic nature of the previous na
 
 [![Demo Video](https://raw.githubusercontent.com/PhrozenIO/Arcane/main/resources/images/video.png)](https://www.youtube.com/watch?v=h6xePrsIcQY)
 
-> Arcane is currently in beta and is not recommended for production environments. Some features are still missing but will soon be integrated into the project. For example, clipboard synchronization, which was available in PowerRemoteDesktop, has not yet been implemented but will be added shortly. I want to take the necessary time, with the help of the community, to ensure that the current features are stable and reliable before focusing on additional content and functionalities.
+> Arcane is currently in beta and is not recommended for production environments. 
 
 ## Key Features
 
