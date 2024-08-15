@@ -194,17 +194,25 @@ You can then pass the output base64 certificate file to parameter `EncodedCertif
 
 ### Main Window
 
-![Main Window](https://raw.githubusercontent.com/PhrozenIO/Arcane/main/resources/images/screenshots/main.png)
+<div style="text-align:center">
+    <img alt="Main Window (Connect)" src="https://raw.githubusercontent.com/PhrozenIO/Arcane/main/resources/images/screenshots/main.png"/>
+</div>
 
 ### Server Fingerprint Validation
 
-![Server Fingerprint](https://raw.githubusercontent.com/PhrozenIO/Arcane/main/resources/images/screenshots/server_fingerprint.png)
+<div style="text-align:center">
+    <img alt="Server Fingerprint Validation" src="https://raw.githubusercontent.com/PhrozenIO/Arcane/main/resources/images/screenshots/server_fingerprint.png"/>
+</div>
 
 ### Settings Window
 
-![Remote Desktop](https://raw.githubusercontent.com/PhrozenIO/Arcane/main/resources/images/screenshots/options_rd.png)
+<div style="text-align:center">
+    <img alt="Remote Desktop Options" src="https://raw.githubusercontent.com/PhrozenIO/Arcane/main/resources/images/screenshots/options_rd.png"/>
+</div>
 
-![Server Trusted Certificates](https://raw.githubusercontent.com/PhrozenIO/Arcane/main/resources/images/screenshots/options_tc.png)
+<div style="text-align:center">
+    <img alt="Trusted Certificates" src="https://raw.githubusercontent.com/PhrozenIO/Arcane/main/resources/images/screenshots/options_tc.png"/>
+</div>
 
 ## Change Log
 
