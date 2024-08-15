@@ -32,7 +32,6 @@ The project was renamed to Arcane to avoid the generic nature of the previous na
 
 * **Profiles Manager**: This feature will allow you to save and manage multiple remote desktop configurations, including the server address, port, and authentication credentials.
 * **Mutual certificate authentication**: This feature will allow you to authenticate both the server and the viewer using X509 certificates.
-* **Clipboard Synchronization**: This feature will allow you to copy and paste text and files between the local and remote desktops.
 * **File Transfer**: This feature will allow you to transfer files between the local and remote desktops.
 * **File Manager**: This feature will allow you to browse and manage files on the remote desktop.
 
