@@ -34,7 +34,21 @@ class RemoteDesktopOptionsTab(QWidget):
         core_layout = QVBoxLayout()
         self.setLayout(core_layout)
 
-        # Advanced Settings (Fieldset)
+        # Options
+        options_layout = QGridLayout()
+        options_layout.setContentsMargins(0, 8, 0, 0)
+        core_layout.addLayout(options_layout)
+
+        clipboard_sharing_label = QLabel("Clipboard Sharing:")
+
+        self.clipboard_sharing_combobox = QComboBox()
+        for value in arcane.ClipboardMode:
+            self.clipboard_sharing_combobox.addItem(value.name, userData=value)
+
+        options_layout.addWidget(clipboard_sharing_label, 0, 0)
+        options_layout.addWidget(self.clipboard_sharing_combobox, 0, 1)
+
+        # Capture Settings (Fieldset)
         desktop_capture_group = QGroupBox("Capture Settings")
         desktop_capture_group_layout = QGridLayout()
         desktop_capture_group.setLayout(desktop_capture_group_layout)
@@ -76,6 +90,14 @@ class RemoteDesktopOptionsTab(QWidget):
 
     def load_settings(self):
         """ Load remote desktop settings from the settings """
+        # Load Options
+        self.clipboard_sharing_combobox.setCurrentIndex(
+            self.clipboard_sharing_combobox.findData(
+                self.settings.value(arcane.SETTINGS_KEY_CLIPBOARD_MODE, arcane.ClipboardMode.Both)
+            )
+        )
+
+        # Load Capture Options
         self.image_quality_input.setValue(self.settings.value(arcane.SETTINGS_KEY_IMAGE_QUALITY, 80))
 
         self.packet_size_input.setCurrentIndex(
@@ -92,6 +114,10 @@ class RemoteDesktopOptionsTab(QWidget):
 
     def save_settings(self):
         """ Save remote desktop settings to the settings """
+        # Save Options
+        self.settings.setValue(arcane.SETTINGS_KEY_CLIPBOARD_MODE, self.clipboard_sharing_combobox.currentData())
+
+        # Save Capture Options
         self.settings.setValue(arcane.SETTINGS_KEY_IMAGE_QUALITY, self.image_quality_input.value())
         self.settings.setValue(arcane.SETTINGS_KEY_PACKET_SIZE, self.packet_size_input.currentData())
         self.settings.setValue(arcane.SETTINGS_KEY_BLOCK_SIZE, self.block_size_input.currentData())

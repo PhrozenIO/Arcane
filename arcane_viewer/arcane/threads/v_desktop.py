@@ -55,14 +55,6 @@ class VirtualDesktopThread(ClientBaseThread):
         logger.info(f"Screen: {self.selected_screen.name} "
                     f"({self.selected_screen.width}x{self.selected_screen.height})")
 
-        print({
-                "ScreenName": self.selected_screen.name,
-                "ImageCompressionQuality": self.session.option_image_quality,
-                "PacketSize": self.session.option_packet_size.value,
-                "BlockSize": self.session.option_block_size.value,
-                "LogonUI": False,  # TODO: 0001
-            })
-
         self.client.write_json(
             {
                 "ScreenName": self.selected_screen.name,

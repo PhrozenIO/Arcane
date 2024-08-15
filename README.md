@@ -21,6 +21,7 @@ The project was renamed to Arcane to avoid the generic nature of the previous na
 * **Secure**: To protect the privacy and security of your remote desktop sessions, the module uses TLSv1.2 or 1.3 to encrypt the network traffic. Access to the server is granted through a challenge-based authentication mechanism that requires a user-defined complex password.
 * **Network Traffic Encryption**: The module supports encrypting the network traffic using either a default X509 certificate (which requires administrator privileges) or your own custom X509 certificate.
 * **Mouse Cursor Icon Synchronization**: The module also synchronizes the state of the mouse cursor icon between the viewer (virtual desktop) and the server, providing a more seamless and intuitive remote desktop experience.
+* **Clipboard Synchronization**: This feature allows you to synchronize the clipboard text between the viewer (your device) and the server (the remote computer). You can easily copy and paste text between the two systems.
 * **Multi-Screen Support**: If the remote computer has more than one desktop screen, you can choose which screen to capture and stream to your device.
 * **View Only Mode**: This feature allows you to disable remote control abilities and simply view the screen of the remote computer. It can be useful for demonstrations or presentations.
 * **Session Concurrency**: Multiple viewers can connect to a single server at the same time, allowing multiple users to collaborate on the same remote desktop.
@@ -194,25 +195,17 @@ You can then pass the output base64 certificate file to parameter `EncodedCertif
 
 ### Main Window
 
-<div style="text-align:center">
-    <img alt="Main Window (Connect)" src="https://raw.githubusercontent.com/PhrozenIO/Arcane/main/resources/images/screenshots/main.png"/>
-</div>
+![Main Window](https://raw.githubusercontent.com/PhrozenIO/Arcane/main/resources/images/screenshots/main.png)
 
 ### Server Fingerprint Validation
 
-<div style="text-align:center">
-    <img alt="Server Fingerprint Validation" src="https://raw.githubusercontent.com/PhrozenIO/Arcane/main/resources/images/screenshots/server_fingerprint.png"/>
-</div>
+![Server Fingerprint](https://raw.githubusercontent.com/PhrozenIO/Arcane/main/resources/images/screenshots/server_fingerprint.png)
 
 ### Settings Window
 
-<div style="text-align:center">
-    <img alt="Remote Desktop Options" src="https://raw.githubusercontent.com/PhrozenIO/Arcane/main/resources/images/screenshots/options_rd.png"/>
-</div>
+![Remote Desktop](https://raw.githubusercontent.com/PhrozenIO/Arcane/main/resources/images/screenshots/options_rd.png)
 
-<div style="text-align:center">
-    <img alt="Trusted Certificates" src="https://raw.githubusercontent.com/PhrozenIO/Arcane/main/resources/images/screenshots/options_tc.png"/>
-</div>
+![Server Trusted Certificates](https://raw.githubusercontent.com/PhrozenIO/Arcane/main/resources/images/screenshots/options_tc.png)
 
 ## Change Log
 

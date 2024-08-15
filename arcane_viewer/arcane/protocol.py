@@ -13,7 +13,7 @@
 
 from enum import Enum, auto
 
-PROTOCOL_VERSION = '5.0.0b1'
+PROTOCOL_VERSION = '5.0.1'
 
 
 class WorkerKind(Enum):
@@ -44,6 +44,8 @@ class OutputEvent(Enum):
     Keyboard = 0x1
     MouseClickMove = 0x2
     MouseWheel = 0x3
+    KeepAlive = 0x4  # Not used but actually defined by the protocol
+    ClipboardUpdated = 0x5
 
 
 class InputEvent(Enum):
