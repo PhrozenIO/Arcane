@@ -12,7 +12,7 @@ The project was renamed to Arcane to avoid the generic nature of the previous na
 
 [![Demo Video](https://raw.githubusercontent.com/PhrozenIO/Arcane/main/resources/images/video.png)](https://www.youtube.com/watch?v=h6xePrsIcQY)
 
-> Arcane is currently in beta and is not recommended for production environments. Some features are still missing but will soon be integrated into the project. For example, clipboard synchronization, which was available in PowerRemoteDesktop, has not yet been implemented but will be added shortly. I want to take the necessary time, with the help of the community, to ensure that the current features are stable and reliable before focusing on additional content and functionalities.
+> Arcane is currently in beta and is not recommended for production environments. 
 
 ## Key Features
 
@@ -21,6 +21,7 @@ The project was renamed to Arcane to avoid the generic nature of the previous na
 * **Secure**: To protect the privacy and security of your remote desktop sessions, the module uses TLSv1.2 or 1.3 to encrypt the network traffic. Access to the server is granted through a challenge-based authentication mechanism that requires a user-defined complex password.
 * **Network Traffic Encryption**: The module supports encrypting the network traffic using either a default X509 certificate (which requires administrator privileges) or your own custom X509 certificate.
 * **Mouse Cursor Icon Synchronization**: The module also synchronizes the state of the mouse cursor icon between the viewer (virtual desktop) and the server, providing a more seamless and intuitive remote desktop experience.
+* **Clipboard Synchronization**: This feature allows you to synchronize the clipboard text between the viewer (your device) and the server (the remote computer). You can easily copy and paste text between the two systems.
 * **Multi-Screen Support**: If the remote computer has more than one desktop screen, you can choose which screen to capture and stream to your device.
 * **View Only Mode**: This feature allows you to disable remote control abilities and simply view the screen of the remote computer. It can be useful for demonstrations or presentations.
 * **Session Concurrency**: Multiple viewers can connect to a single server at the same time, allowing multiple users to collaborate on the same remote desktop.
@@ -44,6 +45,7 @@ The project was renamed to Arcane to avoid the generic nature of the previous na
 | 1.0.0b1 (Beta) | 5.0.0b1          | 01 August 2024 |
 | 1.0.0b2 (Beta) | 5.0.0b1          | 05 August 2024 |
 | 1.0.3 (Beta)   | 5.0.0b1          | 12 August 2024 |
+| 1.0.4 (Beta)   | 5.0.1            | 15 August 2024 |
 
 > You can use any version of the viewer with any version of the server, as long as the protocol version matches. The protocol version ensures compatibility between the viewer and the server.
 
@@ -192,21 +194,28 @@ You can then pass the output base64 certificate file to parameter `EncodedCertif
 
 ## Viewer Screenshots
 
-### Main Window
+<p align="center">
+    <img width="50%" src="https://raw.githubusercontent.com/PhrozenIO/Arcane/main/resources/images/screenshots/main.png" alt="Main Window"/>
+</p>
 
-![Main Window](https://raw.githubusercontent.com/PhrozenIO/Arcane/main/resources/images/screenshots/main.png)
+<p align="center">
+    <img width="50%" src="https://raw.githubusercontent.com/PhrozenIO/Arcane/main/resources/images/screenshots/server_fingerprint.png" alt="Server Fingerprint Validation"/>
+</p>
 
-### Server Fingerprint Validation
+<p align="center">
+    <img width="50%" src="https://raw.githubusercontent.com/PhrozenIO/Arcane/main/resources/images/screenshots/options_rd.png" alt="Remote Desktop Options"/>
+</p>
 
-![Server Fingerprint](https://raw.githubusercontent.com/PhrozenIO/Arcane/main/resources/images/screenshots/server_fingerprint.png)
-
-### Settings Window
-
-![Remote Desktop](https://raw.githubusercontent.com/PhrozenIO/Arcane/main/resources/images/screenshots/options_rd.png)
-
-![Server Trusted Certificates](https://raw.githubusercontent.com/PhrozenIO/Arcane/main/resources/images/screenshots/options_tc.png)
+<p align="center">
+    <img width="50%" src="https://raw.githubusercontent.com/PhrozenIO/Arcane/main/resources/images/screenshots/options_tc.png" alt="Server Trusted Certificates"/>
+</p>
 
 ## Change Log
+
+### Version 1.0.4 (Beta)
+
+- [x] Clipboard synchronization has been implemented, allowing users to copy and paste text between the viewer and the server.
+- [x] Minor bug fixes and code improvements.
 
 ### Version 1.0.3 (Beta)
 

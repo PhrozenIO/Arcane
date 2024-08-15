@@ -21,7 +21,8 @@ import logging
 from sys import platform
 
 from PyQt6.QtCore import Qt, pyqtSlot
-from PyQt6.QtWidgets import QGraphicsScene, QGraphicsView
+from PyQt6.QtGui import QClipboard
+from PyQt6.QtWidgets import QApplication, QGraphicsScene, QGraphicsView
 
 import arcane_viewer.arcane as arcane
 
@@ -48,11 +49,15 @@ class TangentUniverse(QGraphicsView):
         self.scene = QGraphicsScene()
         self.setScene(self.scene)
 
+        self.clipboard = QApplication.clipboard()
+        self.clipboard.dataChanged.connect(self.clipboard_data_changed)
+
     def set_event_thread(self, events_thread):
         """ Set the events thread """
         self.events_thread = events_thread
 
         self.events_thread.update_mouse_cursor.connect(self.update_mouse_cursor)
+        self.events_thread.update_clipboard.connect(self.update_clipboard)
 
     def set_screen(self, screen: arcane.Screen):
         """ Set the captured screen original information """
@@ -131,6 +136,14 @@ class TangentUniverse(QGraphicsView):
         x, y = self.fix_mouse_position(pos.x(), pos.y())
 
         self.send_mouse_event(x, y, arcane.MouseState.Move, arcane.MouseButton.Void)
+
+    def clipboard_data_changed(self):
+        """ Handle clipboard data changed event """
+        text = self.clipboard.text(QClipboard.Mode.Clipboard)
+
+        self.events_thread.send_clipboard_text(
+            text
+        )
 
     def keyPressEvent(self, event):
         """ Override keyPressEvent method to handle key press events """
@@ -252,3 +265,7 @@ class TangentUniverse(QGraphicsView):
     @pyqtSlot(Qt.CursorShape)
     def update_mouse_cursor(self, cursor):
         self.setCursor(cursor)
+
+    @pyqtSlot(str)
+    def update_clipboard(self, text):
+        self.clipboard.setText(text)

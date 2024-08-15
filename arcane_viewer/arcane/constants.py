@@ -32,7 +32,7 @@ else:
 
 
 # Application Information
-APP_VERSION = "1.0.3"
+APP_VERSION = "1.0.4"
 APP_NAME = "Arcane"
 APP_ORGANIZATION_NAME = "Phrozen"
 APP_DISPLAY_NAME = f"{APP_NAME} {APP_VERSION} (βeta)"
@@ -49,3 +49,4 @@ SETTINGS_KEY_TRUSTED_CERTIFICATES = "trusted_certificates"
 SETTINGS_KEY_IMAGE_QUALITY = "image_quality"
 SETTINGS_KEY_PACKET_SIZE = "packet_size"
 SETTINGS_KEY_BLOCK_SIZE = "block_size"
+SETTINGS_KEY_CLIPBOARD_MODE = "clipboard_mode"

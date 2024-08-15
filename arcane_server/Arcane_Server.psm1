@@ -142,8 +142,8 @@ Add-Type @"
     }
 "@
 
-$global:ArcaneVersion = "1.0.0"
-$global:ArcaneProtocolVersion = "5.0.0b1"
+$global:ArcaneVersion = "1.0.4"
+$global:ArcaneProtocolVersion = "5.0.1"
 
 $global:HostSyncHash = [HashTable]::Synchronized(@{
     host = $host
@@ -1227,7 +1227,10 @@ $global:IngressEventScriptBlock = {
 
             # Clipboard Update
             ([InputEvent]::ClipboardUpdated)
-            {                
+            {
+                if ($Param.ViewOnly)
+                { continue }
+
                 if ($Param.Clipboard -eq ([ClipboardMode]::Disabled) -or $Param.Clipboard -eq ([ClipboardMode]::Send))
                 { continue }
 
@@ -1430,7 +1433,10 @@ $global:EgressEventScriptBlock = {
                 $eventTriggered = $false
 
                 # Clipboard Update Detection
-                if ($Param.Clipboard -eq ([ClipboardMode]::Both) -or $Param.Clipboard -eq ([ClipboardMode]::Send))
+                if (
+                    ($Param.Clipboard -eq ([ClipboardMode]::Both) -or $Param.Clipboard -eq ([ClipboardMode]::Send)) `
+                    -and (-not $Param.ViewOnly)
+                )
                 {
                     # IDEA: Check for existing clipboard change event or implement a custom clipboard
                     # change detector using "WM_CLIPBOARDUPDATE" for example (WITHOUT INLINE C#)
@@ -2285,6 +2291,7 @@ class SessionManager {
                 SessionId = $session.Id
                 Version = $global:ArcaneProtocolVersion
                 ViewOnly = $this.ViewOnly
+                Clipboard = $this.Clipboard
 
                 # Local machine information
                 MachineName = [Environment]::MachineName

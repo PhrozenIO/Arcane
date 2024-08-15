@@ -25,11 +25,13 @@ logger = logging.getLogger(__name__)
 
 class EventsThread(ClientBaseThread):
     update_mouse_cursor = pyqtSignal(Qt.CursorShape)
+    update_clipboard = pyqtSignal(str)
 
     def __init__(self, session: arcane.Session):
         super().__init__(session, arcane.WorkerKind.Events)
 
     def client_execute(self):
+        """ Execute the client thread """
         while self._running:
             try:
                 event = self.client.read_json()
@@ -41,6 +43,7 @@ class EventsThread(ClientBaseThread):
 
             event_id = event["Id"]
 
+            # Handle Cursor Icon Updates and Reflect it on the Virtual Desktop (Native Cursor)
             if event_id == arcane.InputEvent.MouseCursorUpdated.value and "Cursor" in event:
                 cursor_name = event["Cursor"]
 
@@ -78,9 +81,21 @@ class EventsThread(ClientBaseThread):
                     cursor = Qt.CursorShape.ForbiddenCursor
 
                 self.update_mouse_cursor.emit(cursor)
+            # Handle Clipboard Updates
+            elif event_id == arcane.InputEvent.ClipboardUpdated.value and "Text" in event:
+                if self.session.clipboard_mode in {
+                    arcane.ClipboardMode.Disabled, arcane.ClipboardMode.Send
+                }:
+                    continue
+
+                self.update_clipboard.emit(event["Text"])
 
     @pyqtSlot(int, int, arcane.MouseState, arcane.MouseButton)
     def send_mouse_event(self, x: int, y: int, state: arcane.MouseState, button: arcane.MouseButton):
+        """ Send mouse event to the server """
+        if self.session.presentation:
+            return
+
         if self.client is not None and self._connected:
             self.client.write_json(
                 {
@@ -94,6 +109,10 @@ class EventsThread(ClientBaseThread):
 
     @pyqtSlot(str)
     def send_key_event(self, keys: str):
+        """ Send keyboard event to the server """
+        if self.session.presentation:
+            return
+
         if self.client is not None and self._connected:
             self.client.write_json(
                 {
@@ -104,10 +123,30 @@ class EventsThread(ClientBaseThread):
 
     @pyqtSlot(int)
     def send_mouse_wheel_event(self, delta: int):
+        """ Send mouse wheel event to the server """
+        if self.session.presentation:
+            return
+
         if self.client is not None and self._connected:
             self.client.write_json(
                 {
                     "Id": arcane.OutputEvent.MouseWheel.name,
                     "Delta": delta,
+                }
+            )
+
+    @pyqtSlot(str)
+    def send_clipboard_text(self, text: str):
+        """ Send clipboard text to the server """
+        if self.session.clipboard_mode in {
+            arcane.ClipboardMode.Disabled, arcane.ClipboardMode.Receive
+        }:
+            return
+
+        if self.client is not None and self._connected:
+            self.client.write_json(
+                {
+                    "Id": arcane.OutputEvent.ClipboardUpdated.name,
+                    "Text": text,
                 }
             )

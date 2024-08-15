@@ -14,6 +14,8 @@
 import json
 import logging
 
+from PyQt6.QtCore import QSettings
+
 import arcane_viewer.arcane as arcane
 
 logger = logging.getLogger(__name__)
@@ -31,9 +33,16 @@ class Session:
         self.presentation = False
         self.server_fingerprint = None
 
-        self.option_image_quality = 80
-        self.option_packet_size = arcane.PacketSize.Size9216
-        self.option_block_size = arcane.BlockSize.Size64
+        # Load settings (options)
+        settings = QSettings(arcane.APP_ORGANIZATION_NAME, arcane.APP_NAME)
+
+        # Remote Desktop Options
+        self.clipboard_mode = settings.value(arcane.SETTINGS_KEY_CLIPBOARD_MODE, arcane.ClipboardMode.Both)
+
+        # Remote Desktop Capture Options
+        self.option_image_quality = settings.value(arcane.SETTINGS_KEY_IMAGE_QUALITY, 80)
+        self.option_packet_size = settings.value(arcane.SETTINGS_KEY_PACKET_SIZE, arcane.PacketSize.Size4096)
+        self.option_block_size = settings.value(arcane.SETTINGS_KEY_BLOCK_SIZE, arcane.BlockSize.Size64)
 
         self.request_session()
 
@@ -81,13 +90,16 @@ class Session:
 
             if not all(k in session_information for k in (
                     "SessionId",
+                    "Version",
+                    "ViewOnly",
+                    "Clipboard",
                     "Username",
                     "MachineName",
-                    "ViewOnly",
-                    "Version"
+                    "WindowsVersion",
             )):
                 raise arcane.ArcaneProtocolException(arcane.ArcaneProtocolError.InvalidStructureData)
 
+            # Protocol Version Check
             if session_information["Version"] != arcane.PROTOCOL_VERSION:
                 logger.error(f"Incompatible server version, client version: `{arcane.PROTOCOL_VERSION}` != "
                              f"server version: `{session_information['Version']}`")
@@ -96,6 +108,7 @@ class Session:
                     arcane.ArcaneProtocolError.UnsupportedVersion
                 )
 
+            # Assign session information
             self.session_id = session_information["SessionId"]
 
             self.display_name = "{}@{}".format(
@@ -103,11 +116,56 @@ class Session:
                 session_information["MachineName"],
             )
 
-            if session_information["ViewOnly"]:
-                logger.info("Presentation mode enforced by remote server")
-                self.presentation = True
+            # Handle Server-Clipboard Mode and solve possible clash with client-clipboard mode
+            # By default, if for any reason, server clipboard mode is not recognized, we consider it as disabled
+            server_clipboard_mode = arcane.ClipboardMode.Disabled
+            try:
+                server_clipboard_mode = arcane.ClipboardMode(session_information["Clipboard"])
+            except ValueError:
+                pass
 
-            logger.info("Session established with remote peer")
+            logger.info("Server clipboard mode: `{}`".format(server_clipboard_mode.name))
+
+            if session_information["ViewOnly"]:
+                logger.warning("Presentation mode enforced by remote server, no input / output "
+                               "(Mouse, Keyboard, Clipboard) will be accepted")
+
+                # In view only (presentation) mode, whatever the client clipboard mode is, we disable it
+                self.clipboard_mode = arcane.ClipboardMode.Disabled
+                self.presentation = True
+            else:
+                # If server clipboard mode is disabled, whatever the client clipboard mode is, we disable it
+                if (server_clipboard_mode == arcane.ClipboardMode.Disabled and
+                        self.clipboard_mode != arcane.ClipboardMode.Disabled):
+                    self.clipboard_mode = arcane.ClipboardMode.Disabled
+                    logger.warning("Server clipboard mode is disabled, reflecting to client clipboard mode")
+                # If server clipboard mode is send-only, we set client clipboard mode to receive-only only if client
+                # clipboard mode is set to both.
+                elif (server_clipboard_mode == arcane.ClipboardMode.Send and
+                      self.clipboard_mode == arcane.ClipboardMode.Both):
+                    self.clipboard_mode = arcane.ClipboardMode.Receive
+                    logger.warning("Server clipboard mode is send-only, client clipboard mode set to receive-only")
+                # If server clipboard mode is receive-only, we set client clipboard mode to send-only only if client
+                # clipboard mode is set to both.
+                elif (server_clipboard_mode == arcane.ClipboardMode.Receive and
+                      self.clipboard_mode == arcane.ClipboardMode.Both):
+                    self.clipboard_mode = arcane.ClipboardMode.Send
+                    logger.warning("Server clipboard mode is receive-only, client clipboard mode set to send-only")
+                # If there is a clash between server and client clipboard mode, we disable it
+                elif (
+                        (server_clipboard_mode == arcane.ClipboardMode.Send and
+                         self.clipboard_mode == arcane.ClipboardMode.Send) or
+                        (server_clipboard_mode == arcane.ClipboardMode.Receive and
+                         self.clipboard_mode == arcane.ClipboardMode.Receive)
+                ):
+                    self.clipboard_mode = arcane.ClipboardMode.Disabled
+                    logger.warning("Server clipboard mode and client clash, clipboard is then disabled")
+
+            # Finally
+            logger.info("Session established with `{}` on `{}`".format(
+                self.display_name,
+                session_information["WindowsVersion"],
+            ))
         finally:
             if client is not None:
                 client.close()

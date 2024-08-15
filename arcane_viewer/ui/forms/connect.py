@@ -237,11 +237,6 @@ class ConnectWindow(QMainWindow, utilities.CenterWindow):
                     "display_name": session.display_name,
                 })
 
-        # Assign Remote Desktop Options
-        self.session.option_image_quality = settings.value(arcane.SETTINGS_KEY_IMAGE_QUALITY, 80)
-        self.session.option_packet_size = settings.value(arcane.SETTINGS_KEY_PACKET_SIZE, arcane.PacketSize.Size4096)
-        self.session.option_block_size = settings.value(arcane.SETTINGS_KEY_BLOCK_SIZE, arcane.BlockSize.Size64)
-
         # Show the Remote Desktop Window
         self.desktop_window = arcane_forms.DesktopWindow(self, self.session)
         self.desktop_window.show()
