@@ -1434,7 +1434,7 @@ $global:EgressEventScriptBlock = {
 
                 # Clipboard Update Detection
                 if (
-                    ($Param.Clipboard -eq ([ClipboardMode]::Both) -or $Param.Clipboard -eq ([ClipboardMode]::Send))
+                    ($Param.Clipboard -eq ([ClipboardMode]::Both) -or $Param.Clipboard -eq ([ClipboardMode]::Send)) `
                     -and (-not $Param.ViewOnly)
                 )
                 {
