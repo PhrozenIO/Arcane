@@ -141,8 +141,9 @@ class Client:
         if self.client is not None:
             logger.info(f"[{self.conn.fileno()}] Closing connection...")
             try:
-                self.conn.shutdown(socket.SHUT_RDWR)
-                self.conn.close()
+                if self.conn is not None:
+                    self.conn.shutdown(socket.SHUT_RDWR)
+                    self.conn.close()
             except OSError:
                 self.client.close()
 

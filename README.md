@@ -45,6 +45,7 @@ The project was renamed to Arcane to avoid the generic nature of the previous na
 | 1.0.0b1 (Beta) | 5.0.0b1          | 01 August 2024 |
 | 1.0.0b2 (Beta) | 5.0.0b1          | 05 August 2024 |
 | 1.0.3 (Beta)   | 5.0.0b1          | 12 August 2024 |
+| 1.0.4 (Beta)   | 5.0.1            | 15 August 2024 |
 
 > You can use any version of the viewer with any version of the server, as long as the protocol version matches. The protocol version ensures compatibility between the viewer and the server.
 
