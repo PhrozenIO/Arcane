@@ -212,6 +212,11 @@ You can then pass the output base64 certificate file to parameter `EncodedCertif
 
 ## Change Log
 
+### Version 1.0.4 (Beta)
+
+- [x] Clipboard synchronization has been implemented, allowing users to copy and paste text between the viewer and the server.
+- [x] Minor bug fixes and code improvements.
+
 ### Version 1.0.3 (Beta)
 
 - [x] The connection window interface has been streamlined, with additional options now accessible in a dedicated settings window.
