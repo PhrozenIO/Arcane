@@ -16,7 +16,7 @@ import os.path
 import socket
 
 from PyQt6.QtCore import QSettings, QSize, Qt, pyqtSlot
-from PyQt6.QtGui import QIcon
+from PyQt6.QtGui import QIcon, QShowEvent
 from PyQt6.QtWidgets import (QDialog, QHBoxLayout, QLabel, QLineEdit,
                              QMainWindow, QMessageBox, QPushButton, QSpinBox,
                              QVBoxLayout, QWidget)
@@ -31,7 +31,7 @@ import arcane_viewer.ui.utilities as utilities
 class ConnectWindow(QMainWindow, utilities.CenterWindow):
     """ Connect Window to establish a connection to the server """
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
         self.__connect_thread = None
@@ -131,11 +131,11 @@ class ConnectWindow(QMainWindow, utilities.CenterWindow):
 
         self.adjust_size()
 
-    def showEvent(self, event):
+    def showEvent(self, event: QShowEvent) -> None:
         super().showEvent(event)
         self.center_on_owner()
 
-    def read_default(self):
+    def read_default(self) -> None:
         """ Read default settings from the default.json file """
         if not os.path.isfile(arcane.DEFAULT_JSON):
             return
@@ -158,7 +158,7 @@ class ConnectWindow(QMainWindow, utilities.CenterWindow):
             if "server_password" in data:
                 self.password_input.setText(data["server_password"])
 
-    def submit_form(self):
+    def submit_form(self) -> None:
         """ Validate the form and submit it """
         try:
             # Check if the ip/hostname is valid
@@ -189,24 +189,24 @@ class ConnectWindow(QMainWindow, utilities.CenterWindow):
         except Exception as e:
             QMessageBox.critical(self, "Form Error", str(e))
 
-    def adjust_size(self):
+    def adjust_size(self) -> None:
         self.setFixedSize(350, self.sizeHint().height())
 
-    def show_about_dialog(self):
+    def show_about_dialog(self) -> None:
         about_window = arcane_dialogs.AboutWindow(self)
         about_window.exec()
 
     @pyqtSlot(str)
-    def session_error(self, error_message):
+    def session_error(self, error_message: str) -> None:
         QMessageBox.critical(self, "Error", error_message)
 
     @pyqtSlot()
-    def connect_thread_started(self):
+    def connect_thread_started(self) -> None:
         self.__connecting_form = arcane_dialogs.ConnectingWindow(self)
         self.__connecting_form.exec()
 
     @pyqtSlot(object)
-    def connect_thread_finished(self, session: arcane.Session = None):
+    def connect_thread_finished(self, session: arcane.Session = None) -> None:
         # Close the connecting form if it is still open
         if self.__connecting_form is not None and self.__connecting_form.isVisible():
             self.__connecting_form.close()

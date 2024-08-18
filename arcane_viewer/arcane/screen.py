@@ -16,7 +16,7 @@ from PyQt6.QtCore import QSize
 
 class Screen:
     """ Screen class to store screen information """
-    def __init__(self, screen_information_json: dict):
+    def __init__(self, screen_information_json: dict) -> None:
         if not all(k in screen_information_json for k in (
                 "Id",
                 "Name",
@@ -36,7 +36,7 @@ class Screen:
         self.y = screen_information_json["Y"]
         self.primary = screen_information_json["Primary"]
 
-    def get_display_name(self):
+    def get_display_name(self) -> str:
         return "#{} - {} ({}x{})".format(
             self.id,
             self.name,
@@ -44,5 +44,5 @@ class Screen:
             self.height
         )
 
-    def size(self):
+    def size(self) -> QSize:
         return QSize(self.width, self.height)

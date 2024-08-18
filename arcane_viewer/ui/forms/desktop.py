@@ -16,11 +16,13 @@
 """
 
 import logging
+from typing import List, Union
 
 from PyQt6.QtCore import QRect, QSize, Qt, pyqtSlot
-from PyQt6.QtGui import QImage, QPainter, QPixmap, QTransform
-from PyQt6.QtWidgets import (QApplication, QGraphicsPixmapItem, QMainWindow,
-                             QMessageBox)
+from PyQt6.QtGui import (QCloseEvent, QImage, QPainter, QPixmap, QResizeEvent,
+                         QShowEvent, QTransform)
+from PyQt6.QtWidgets import (QApplication, QDialog, QGraphicsPixmapItem,
+                             QMainWindow, QMessageBox)
 
 import arcane_viewer.arcane as arcane
 import arcane_viewer.arcane.threads as arcane_threads
@@ -31,7 +33,7 @@ logger = logging.getLogger(__name__)
 
 
 class DesktopWindow(QMainWindow):
-    def __init__(self, parent, session):
+    def __init__(self, parent: Union[QDialog, QMainWindow], session: arcane.Session) -> None:
         super().__init__()
 
         self.tangent_universe = None
@@ -64,7 +66,7 @@ class DesktopWindow(QMainWindow):
 
         self.start_desktop_thread()
 
-    def thread_finished(self, on_error):
+    def thread_finished(self, on_error: bool) -> None:
         """ Handle the thread finished event """
         if on_error:
             QMessageBox.critical(self, "Error", "Something went wrong, check console output for more information.")
@@ -75,7 +77,7 @@ class DesktopWindow(QMainWindow):
 
         self.close()
 
-    def start_desktop_thread(self):
+    def start_desktop_thread(self) -> None:
         """ Start the desktop thread to handle remote desktop streaming """
         self.desktop_thread = arcane_threads.VirtualDesktopThread(self.session)
         self.desktop_thread.chunk_received.connect(self.update_scene)
@@ -84,7 +86,7 @@ class DesktopWindow(QMainWindow):
         self.desktop_thread.request_screen_selection.connect(self.display_screen_selection_dialog)
         self.desktop_thread.start()
 
-    def start_events_thread(self, screen):
+    def start_events_thread(self, screen: arcane.Screen) -> None:
         """ Start the events thread to handle remote desktop events """
         self.events_thread = arcane_threads.EventsThread(self.session)
         self.events_thread.thread_finished.connect(self.thread_finished)
@@ -94,7 +96,7 @@ class DesktopWindow(QMainWindow):
         self.tangent_universe.set_event_thread(self.events_thread)
         self.tangent_universe.set_screen(screen)
 
-    def close_cellar_door(self):
+    def close_cellar_door(self) -> None:
         """ Collapse Tangent Universe to Main Branch, We were able to save the world before 28:06:42:12 """
         if self.desktop_thread is not None:
             if self.desktop_thread.isRunning():
@@ -106,13 +108,13 @@ class DesktopWindow(QMainWindow):
                 self.events_thread.stop()
                 self.events_thread.wait()
 
-    def showEvent(self, event):
+    def showEvent(self, event: QShowEvent) -> None:
         super().showEvent(event)
 
         if self.parent is not None:
             self.parent.hide()
 
-    def closeEvent(self, event):
+    def closeEvent(self, event: QCloseEvent) -> None:
         """ Overridden close method to handle the cleanup
             `I Hope That When The World Comes To An End, I Can Breathe A Sigh Of Relief Because There Will Be So Much To
              Look Forward To.`"""
@@ -136,7 +138,7 @@ class DesktopWindow(QMainWindow):
         else:
             event.ignore()
 
-    def open_cellar_door(self, screen):
+    def open_cellar_door(self, screen: arcane.Screen) -> None:
         """ Initialize the virtual desktop (Tangent Universe) """
         self.v_desktop = QPixmap(screen.size())
         self.v_desktop.fill(Qt.GlobalColor.black)
@@ -188,7 +190,7 @@ class DesktopWindow(QMainWindow):
         # TODO: 0001
         self.start_events_thread(screen)
 
-    def fit_scene(self):
+    def fit_scene(self) -> None:
         """ Fit the scene (Hacky Technique) to the view """
         if self.tangent_universe is None or self.scene_pixmap is None:
             return
@@ -206,7 +208,7 @@ class DesktopWindow(QMainWindow):
         transform.scale(scale_x, scale_y)
         self.tangent_universe.setTransform(transform, False)
 
-    def update_scene(self, chunk, x, y):
+    def update_scene(self, chunk: QImage, x: int, y: int) -> None:
         """ Update the virtual desktop with the received chunk """
         if self.v_desktop is None:
             return
@@ -226,16 +228,16 @@ class DesktopWindow(QMainWindow):
 
         self.fit_scene()
 
-    def resizeEvent(self, event):
+    def resizeEvent(self, event: QResizeEvent) -> None:
         """ Overridden resizeEvent method to fit the scene to the view """
         self.fit_scene()
 
-    def screen_selection_rejected(self):
+    def screen_selection_rejected(self) -> None:
         self.universe_collapsed = True
         self.close()
 
     @pyqtSlot(list)
-    def display_screen_selection_dialog(self, screens):
+    def display_screen_selection_dialog(self, screens: List[arcane.Screen]) -> None:
         """ Display screen selection dialog """
         screen_selection_dialog = arcane_dialogs.ScreenSelectionWindow(self, screens)
         screen_selection_dialog.accepted.connect(lambda: self.desktop_thread.on_screen_selection_dialog_closed(

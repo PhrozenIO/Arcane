@@ -20,19 +20,19 @@ ASSETS_IDENTIFIER = "arcane_viewer.assets"
 if sys.version_info < (3, 9):
     import pkg_resources
 
-    def get_asset_file(asset_name):
+    def get_asset_file(asset_name: str) -> str:
         return pkg_resources.resource_filename(ASSETS_IDENTIFIER, asset_name)
 
 else:
     import importlib.resources as resources
 
-    def get_asset_file(asset_name):
+    def get_asset_file(asset_name: str) -> str:
         with resources.files(ASSETS_IDENTIFIER) / asset_name as asset_path:
             return str(asset_path)
 
 
 # Application Information
-APP_VERSION = "1.0.4"
+APP_VERSION = "1.0.5"
 APP_NAME = "Arcane"
 APP_ORGANIZATION_NAME = "Phrozen"
 APP_DISPLAY_NAME = f"{APP_NAME} {APP_VERSION} (βeta)"

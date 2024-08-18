@@ -38,7 +38,7 @@ logger = logging.getLogger(__name__)
 
 class Client:
     """ Client class to handle secure communication with remote server """
-    def __init__(self, server_address: str, server_port: int, password: str):
+    def __init__(self, server_address: str, server_port: int, password: str) -> None:
         logger.info("Connecting to remote server: `{}:{}`...".format(
             server_address,
             server_port
@@ -78,10 +78,10 @@ class Client:
 
         logger.info("Authentication successful")
 
-    def __del__(self):
+    def __del__(self) -> None:
         self.close()
 
-    def read_line(self):
+    def read_line(self) -> str:
         data = b""
 
         while True:
@@ -99,19 +99,19 @@ class Client:
 
         return data.decode('utf-8').strip()
 
-    def write_line(self, line: str):
+    def write_line(self, line: str) -> None:
         self.conn.write(line.encode('utf-8') + b'\r\n')
 
-    def read_json(self):
+    def read_json(self) -> dict:
         try:
             return json.loads(self.read_line())
         except json.JSONDecodeError:
-            return None
+            return {}
 
-    def write_json(self, data: dict):
+    def write_json(self, data: dict) -> None:
         self.write_line(json.dumps(data))
 
-    def authenticate(self, password: str):
+    def authenticate(self, password: str) -> None:
         logger.debug("Request challenge...")
 
         challenge = self.read_line()
@@ -137,7 +137,7 @@ class Client:
                 arcane.ArcaneProtocolError.AuthenticationFailed
             )
 
-    def close(self):
+    def close(self) -> None:
         if self.client is not None:
             logger.info(f"[{self.conn.fileno()}] Closing connection...")
             try:

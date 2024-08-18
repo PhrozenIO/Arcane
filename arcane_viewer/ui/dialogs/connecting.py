@@ -11,17 +11,20 @@
     www.phrozen.io
 """
 
+from typing import Optional, Union
+
 from PyQt6.QtCore import QSize, Qt
-from PyQt6.QtGui import QIcon
-from PyQt6.QtWidgets import (QDialog, QHBoxLayout, QLabel, QProgressBar,
-                             QSizePolicy, QSpacerItem, QVBoxLayout)
+from PyQt6.QtGui import QIcon, QShowEvent
+from PyQt6.QtWidgets import (QDialog, QHBoxLayout, QLabel, QMainWindow,
+                             QProgressBar, QSizePolicy, QSpacerItem,
+                             QVBoxLayout)
 
 import arcane_viewer.arcane as arcane
 import arcane_viewer.ui.utilities as utilities
 
 
 class ConnectingWindow(QDialog, utilities.CenterWindow):
-    def __init__(self, parent):
+    def __init__(self, parent: Optional[Union[QDialog, QMainWindow]] = None) -> None:
         super().__init__(parent)
 
         self.setWindowTitle("📡 Connecting...")
@@ -57,6 +60,6 @@ class ConnectingWindow(QDialog, utilities.CenterWindow):
         spacer_bottom = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
         info_layout.addItem(spacer_bottom)
 
-    def showEvent(self, event):
+    def showEvent(self, event: QShowEvent) -> None:
         super().showEvent(event)
         self.center_on_owner(self.parent())

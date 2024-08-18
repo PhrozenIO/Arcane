@@ -25,7 +25,7 @@ class ArcaneProtocolError(Enum):
 
 
 class ArcaneProtocolException(Exception):
-    def __init__(self, reason: ArcaneProtocolError):
+    def __init__(self, reason: ArcaneProtocolError) -> None:
         self.reason = reason
 
         error_messages = {

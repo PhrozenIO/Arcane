@@ -11,12 +11,14 @@
     www.phrozen.io
 """
 
-from PyQt6.QtCore import QSettings, Qt
-from PyQt6.QtGui import QStandardItem, QStandardItemModel
+from typing import Optional, Union
+
+from PyQt6.QtCore import QModelIndex, QSettings, Qt
+from PyQt6.QtGui import QShowEvent, QStandardItem, QStandardItemModel
 from PyQt6.QtWidgets import (QComboBox, QDialog, QGridLayout, QGroupBox,
-                             QHBoxLayout, QLabel, QMessageBox, QPushButton,
-                             QSizePolicy, QSpacerItem, QSpinBox, QTabWidget,
-                             QTreeView, QVBoxLayout, QWidget)
+                             QHBoxLayout, QLabel, QMainWindow, QMessageBox,
+                             QPushButton, QSizePolicy, QSpacerItem, QSpinBox,
+                             QTabWidget, QTreeView, QVBoxLayout, QWidget)
 
 import arcane_viewer.arcane as arcane
 import arcane_viewer.ui.utilities as utilities
@@ -26,7 +28,7 @@ from .options_dialogs import ServerCertificateAddOrEditDialog
 
 class RemoteDesktopOptionsTab(QWidget):
     """ Remote Desktop Options Tab """
-    def __init__(self, settings: QSettings):
+    def __init__(self, settings: QSettings) -> None:
         super().__init__()
 
         self.settings = settings
@@ -88,7 +90,7 @@ class RemoteDesktopOptionsTab(QWidget):
 
         core_layout.addItem(QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
 
-    def load_settings(self):
+    def load_settings(self) -> None:
         """ Load remote desktop settings from the settings """
         # Load Options
         self.clipboard_sharing_combobox.setCurrentIndex(
@@ -112,7 +114,7 @@ class RemoteDesktopOptionsTab(QWidget):
             )
         )
 
-    def save_settings(self):
+    def save_settings(self) -> None:
         """ Save remote desktop settings to the settings """
         # Save Options
         self.settings.setValue(arcane.SETTINGS_KEY_CLIPBOARD_MODE, self.clipboard_sharing_combobox.currentData())
@@ -125,7 +127,7 @@ class RemoteDesktopOptionsTab(QWidget):
 
 class TrustedCertificateModel(QStandardItemModel):
     """ Trusted Certificate Model (Disables editing of the fingerprint) """
-    def flags(self, index):
+    def flags(self, index:  QModelIndex) -> Qt.ItemFlag:
         if index.column() == 1:  # Fingerprint
             return Qt.ItemFlag.ItemIsSelectable | Qt.ItemFlag.ItemIsEnabled
 
@@ -134,7 +136,7 @@ class TrustedCertificateModel(QStandardItemModel):
 
 class TrustedCertificatesOptionsTab(QWidget):
     """ Trusted Certificates Options Tab """
-    def __init__(self, settings: QSettings):
+    def __init__(self, settings: QSettings) -> None:
         super().__init__()
 
         self.settings = settings
@@ -173,7 +175,7 @@ class TrustedCertificatesOptionsTab(QWidget):
 
         action_buttons_layout.addItem(QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
 
-    def add_or_edit_row(self, fingerprint: str, display_name: str, description: str):
+    def add_or_edit_row(self, fingerprint: str, display_name: str, description: str) -> None:
         """ Add a certificate to the list """
         # Edit row if it already exists
         for i in range(self.model.rowCount()):
@@ -190,13 +192,13 @@ class TrustedCertificatesOptionsTab(QWidget):
             QStandardItem(description),
         ])
 
-    def tree_view_selection_changed(self):
+    def tree_view_selection_changed(self) -> None:
         """ Update the state of the action buttons based on the selection """
         b = self.tree_view.currentIndex().isValid()
         self.edit_button.setEnabled(b)
         self.remove_button.setEnabled(b)
 
-    def remove_button_clicked(self):
+    def remove_button_clicked(self) -> None:
         """ Remove the selected certificate from the list """
         selected_index = self.tree_view.currentIndex()
         if not selected_index.isValid():
@@ -204,7 +206,7 @@ class TrustedCertificatesOptionsTab(QWidget):
 
         self.model.removeRow(selected_index.row())
 
-    def add_or_edit_certificate(self, edit_selected: bool):
+    def add_or_edit_certificate(self, edit_selected: bool) -> None:
         """ Add or edit a certificate """
         fingerprint = None
         if edit_selected and self.tree_view.currentIndex().isValid():
@@ -220,7 +222,7 @@ class TrustedCertificatesOptionsTab(QWidget):
                 dialog.description_edit.toPlainText()
             )
 
-    def load_settings(self):
+    def load_settings(self) -> None:
         """ Load trusted certificates from the settings """
         # First we clear the list
         self.model.clear()
@@ -253,7 +255,7 @@ class TrustedCertificatesOptionsTab(QWidget):
         for i in range(self.model.columnCount()):
             self.tree_view.resizeColumnToContents(i)
 
-    def save_settings(self):
+    def save_settings(self) -> None:
         """ Save trusted certificates to the settings """
         certificates = []
         for i in range(self.model.rowCount()):
@@ -279,7 +281,7 @@ class TrustedCertificatesOptionsTab(QWidget):
 
 class OptionsDialog(QDialog, utilities.CenterWindow):
     """ Arcane Options Dialog """
-    def __init__(self, parent):
+    def __init__(self, parent: Optional[Union[QDialog, QMainWindow]] = None) -> None:
         super().__init__(parent)
 
         self.settings = QSettings(arcane.APP_ORGANIZATION_NAME, arcane.APP_NAME)
@@ -333,17 +335,17 @@ class OptionsDialog(QDialog, utilities.CenterWindow):
 
         self.adjust_size()
 
-    def load_settings(self):
+    def load_settings(self) -> None:
         self.remote_desktop_tab.load_settings()
         self.trusted_certificates_tab.load_settings()
 
-    def save_settings(self):
+    def save_settings(self) -> None:
         self.remote_desktop_tab.save_settings()
         self.trusted_certificates_tab.save_settings()
 
         self.accept()
 
-    def reset_settings(self):
+    def reset_settings(self) -> None:
         if QMessageBox.question(
                 self,
                 "Reset Settings",
@@ -353,10 +355,12 @@ class OptionsDialog(QDialog, utilities.CenterWindow):
 
             self.load_settings()
 
-    def adjust_size(self):
+    def adjust_size(self) -> None:
         self.setFixedSize(420, self.sizeHint().height())
 
-    def showEvent(self, event):
+    def showEvent(self, event: QShowEvent) -> None:
         super().showEvent(event)
+
+        self.center_on_owner(self.parent())
 
         self.load_settings()

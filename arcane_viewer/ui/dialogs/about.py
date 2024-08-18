@@ -12,18 +12,19 @@
 """
 
 import sys
+from typing import Optional, Union
 
 from PyQt6.QtCore import QT_VERSION_STR, QSize, Qt
-from PyQt6.QtGui import QIcon
-from PyQt6.QtWidgets import (QDialog, QHBoxLayout, QLabel, QPushButton,
-                             QVBoxLayout)
+from PyQt6.QtGui import QIcon, QShowEvent
+from PyQt6.QtWidgets import (QDialog, QHBoxLayout, QLabel, QMainWindow,
+                             QPushButton, QVBoxLayout)
 
 import arcane_viewer.arcane as arcane
 import arcane_viewer.ui.utilities as utilities
 
 
 class AboutWindow(QDialog, utilities.CenterWindow):
-    def __init__(self, parent):
+    def __init__(self, parent: Optional[Union[QDialog, QMainWindow]] = None) -> None:
         super().__init__(parent)
 
         self.setWindowTitle(f"About {arcane.APP_DISPLAY_NAME}")
@@ -74,9 +75,9 @@ class AboutWindow(QDialog, utilities.CenterWindow):
 
         self.adjust_size()
 
-    def adjust_size(self):
+    def adjust_size(self) -> None:
         self.setFixedSize(380, self.sizeHint().height())
 
-    def showEvent(self, event):
+    def showEvent(self, event: QShowEvent) -> None:
         super().showEvent(event)
         self.center_on_owner(self.parent())

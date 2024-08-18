@@ -27,7 +27,7 @@ class ClientBaseThread(QThread):
 
     """`Destruction is a form of creation. So the fact they burn the money is ironic. They just want to see what happens
      when they tear the world apart. They want to change things.`, Donnie Darko"""
-    def __init__(self, session: arcane.Session, worker_kind: arcane.WorkerKind):
+    def __init__(self, session: arcane.Session, worker_kind: arcane.WorkerKind) -> None:
         super().__init__()
 
         self._running = True
@@ -36,7 +36,7 @@ class ClientBaseThread(QThread):
         self.client = None
         self.worker_kind = worker_kind
 
-    def run(self):
+    def run(self) -> None:
         on_error = False
         try:
             self.client = self.session.claim_client(self.worker_kind)
@@ -60,11 +60,11 @@ class ClientBaseThread(QThread):
             self.thread_finished.emit(on_error)
 
     @abstractmethod
-    def client_execute(self):
+    def client_execute(self) -> None:
         pass
 
     @pyqtSlot()
-    def stop(self):
+    def stop(self) -> None:
         self._running = False
 
         if self.client is not None:

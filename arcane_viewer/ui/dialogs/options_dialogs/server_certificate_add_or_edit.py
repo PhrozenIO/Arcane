@@ -12,18 +12,21 @@
 """
 
 import re
+from typing import Optional, Union
 
 from PyQt6.QtCore import QSettings
+from PyQt6.QtGui import QShowEvent
 from PyQt6.QtWidgets import (QDialog, QHBoxLayout, QLabel, QLineEdit,
-                             QMessageBox, QPushButton, QSizePolicy,
-                             QSpacerItem, QTextEdit, QVBoxLayout)
+                             QMainWindow, QMessageBox, QPushButton,
+                             QSizePolicy, QSpacerItem, QTextEdit, QVBoxLayout)
 
 import arcane_viewer.arcane as arcane
 import arcane_viewer.ui.utilities as utilities
 
 
 class ServerCertificateAddOrEditDialog(QDialog, utilities.CenterWindow):
-    def __init__(self, parent, settings: QSettings, fingerprint: str = None):
+    def __init__(self, parent: Optional[Union[QDialog, QMainWindow]], settings: QSettings, fingerprint: str = None)\
+            -> None:
         super().__init__(parent)
 
         self.settings = settings
@@ -91,7 +94,7 @@ class ServerCertificateAddOrEditDialog(QDialog, utilities.CenterWindow):
 
         self.adjust_size()
 
-    def save_or_update_certificate(self):
+    def save_or_update_certificate(self) -> None:
         """ Save or update the certificate information """
         if self.fingerprint is None:
             fingerprint = self.fingerprint_edit.text().upper()
@@ -108,5 +111,9 @@ class ServerCertificateAddOrEditDialog(QDialog, utilities.CenterWindow):
 
         self.accept()
 
-    def adjust_size(self):
+    def adjust_size(self) -> None:
         self.setFixedSize(400, self.sizeHint().height())
+
+    def showEvent(self, event: QShowEvent) -> None:
+        super().showEvent(event)
+        self.center_on_owner(self.parent())

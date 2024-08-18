@@ -11,16 +11,20 @@
     www.phrozen.io
 """
 
-from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import (QComboBox, QDialog, QHBoxLayout, QLabel,
-                             QPushButton, QVBoxLayout)
+from typing import List, Optional, Union
 
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QShowEvent
+from PyQt6.QtWidgets import (QComboBox, QDialog, QHBoxLayout, QLabel,
+                             QMainWindow, QPushButton, QVBoxLayout)
+
+import arcane_viewer.arcane as arcane
 import arcane_viewer.ui.utilities as utilities
 
 
 class ScreenSelectionWindow(QDialog, utilities.CenterWindow):
     """ Screen Selection Dialog """
-    def __init__(self, parent, screens):
+    def __init__(self, parent: Optional[Union[QDialog, QMainWindow]], screens: List[arcane.Screen]) -> None:
         super().__init__(parent)
 
         self.screens = screens
@@ -70,10 +74,10 @@ class ScreenSelectionWindow(QDialog, utilities.CenterWindow):
 
         self.setFixedSize(290, self.sizeHint().height())
 
-    def showEvent(self, event):
+    def showEvent(self, event: QShowEvent) -> None:
         super().showEvent(event)
         self.center_on_owner(self.parent())
 
-    def get_selected_screen(self):
+    def get_selected_screen(self) -> arcane.Screen:
         """ Get the user-choice selected screen """
         return [screen for screen in self.screens if screen.name == self.screen_selection_combobox.currentData()][0]

@@ -98,7 +98,7 @@ class PacketSize(Enum):
     Size16384 = 16384
 
     @property
-    def display_name(self):
+    def display_name(self) -> str:
         return f"{self.value} bytes"
 
 
@@ -111,5 +111,5 @@ class BlockSize(Enum):
     Size512 = 512
 
     @property
-    def display_name(self):
+    def display_name(self) -> str:
         return f"{self.value}x{self.value}"

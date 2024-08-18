@@ -21,7 +21,7 @@ MONOSPACE_FONTS = QFont("Consolas, 'Courier New', Monaco, 'DejaVu Sans Mono', 'L
 
 class CenterWindow:
     """ Mixin to center a window on the screen or on another window """
-    def center_on_owner(self: Union[QDialog, QMainWindow], owner: Union[QDialog, QMainWindow] = None):
+    def center_on_owner(self: Union[QDialog, QMainWindow], owner: Union[QDialog, QMainWindow] = None) -> None:
         if owner is None:
             owner_geometry = self.screen().availableGeometry()
         else:

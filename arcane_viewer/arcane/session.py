@@ -13,6 +13,7 @@
 
 import json
 import logging
+from typing import Optional
 
 from PyQt6.QtCore import QSettings
 
@@ -23,15 +24,16 @@ logger = logging.getLogger(__name__)
 
 class Session:
     """ Session class to handle remote session """
-    def __init__(self, server_address: str, server_port: int, password: str):
+    def __init__(self, server_address: str, server_port: int, password: str) -> None:
         self.server_address = server_address
         self.server_port = server_port
         self.__password = password
 
-        self.session_id = None
-        self.display_name = None
         self.presentation = False
-        self.server_fingerprint = None
+
+        self.session_id: Optional[str] = None
+        self.display_name: Optional[str] = None
+        self.server_fingerprint: Optional[str] = None
 
         # Load settings (options)
         settings = QSettings(arcane.APP_ORGANIZATION_NAME, arcane.APP_NAME)
@@ -46,7 +48,7 @@ class Session:
 
         self.request_session()
 
-    def claim_client(self, worker_kind: arcane.WorkerKind = None):
+    def claim_client(self, worker_kind: Optional[arcane.WorkerKind] = None) -> arcane.Client:
         """ Establish a new TLS connection to the remote server and authenticate. Optionally we can specify a worker
         to be attached to the current session """
         client = arcane.Client(self.server_address, self.server_port, self.__password)
@@ -73,7 +75,7 @@ class Session:
 
         return client
 
-    def request_session(self):
+    def request_session(self) -> None:
         """ Request a new session to the remote server """
         client = self.claim_client()
         try:

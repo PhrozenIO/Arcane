@@ -27,14 +27,14 @@ class ConnectThread(QThread):
     thread_finished = pyqtSignal(object)
     session_error = pyqtSignal(str)
 
-    def __init__(self, server_address: str, server_port: int, password: str):
+    def __init__(self, server_address: str, server_port: int, password: str) -> None:
         super().__init__()
 
         self.server_address = server_address
         self.server_port = server_port
         self.__password = password
 
-    def run(self):
+    def run(self) -> None:
         session = None
 
         self.thread_started.emit()

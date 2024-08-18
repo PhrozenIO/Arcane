@@ -34,7 +34,7 @@ class VirtualDesktopThread(ClientBaseThread):
     request_screen_selection = pyqtSignal(list)
     chunk_received = pyqtSignal(QImage, int, int)
 
-    def __init__(self, session: arcane.Session):
+    def __init__(self, session: arcane.Session) -> None:
         super().__init__(session, arcane.WorkerKind.Desktop)
 
         self.selected_screen = None
@@ -42,7 +42,7 @@ class VirtualDesktopThread(ClientBaseThread):
 
     """`Destruction is a form of creation. So the fact they burn the money is ironic. They just want to see what happens
      when they tear the world apart. They want to change things.`, Donnie Darko"""
-    def client_execute(self):
+    def client_execute(self) -> None:
         screens_obj = self.client.read_json()
         screens = [arcane.Screen(screen) for screen in screens_obj["List"]]
         logger.info(f"{len(screens)} screen(s) detected")
@@ -97,13 +97,13 @@ class VirtualDesktopThread(ClientBaseThread):
                 y,
             )
 
-    def stop(self):
+    def stop(self) -> None:
         super().stop()
 
         if self.event_loop is not None:
             self.event_loop.quit()
 
-    def display_screen_selection_dialog(self, screens: List[arcane.Screen]):
+    def display_screen_selection_dialog(self, screens: List[arcane.Screen]) -> None:
         self.event_loop = QEventLoop()
 
         self.request_screen_selection.emit(screens)
@@ -111,7 +111,7 @@ class VirtualDesktopThread(ClientBaseThread):
         self.event_loop.exec()
 
     @pyqtSlot(arcane.Screen)
-    def on_screen_selection_dialog_closed(self, screen: arcane.Screen):
+    def on_screen_selection_dialog_closed(self, screen: arcane.Screen) -> None:
         if self.event_loop is not None:
             self.event_loop.quit()
             self.event_loop = None
