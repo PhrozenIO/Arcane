@@ -1,21 +1,13 @@
 """
-    Arcane - A secure remote desktop application for Windows with the
-    particularity of having a server entirely written in PowerShell and
-    a cross-platform client (Python/QT6).
-
     Author: Jean-Pierre LESUEUR (@DarkCoderSc)
     License: Apache License 2.0
-    https://github.com/PhrozenIO
-    https://github.com/DarkCoderSc
-    https://twitter.com/DarkCoderSc
-    www.phrozen.io
+    More information about the LICENSE on the LICENSE file in the root directory of the project.
 """
 
 import re
 from typing import Optional, Union
 
 from PyQt6.QtCore import QSettings
-from PyQt6.QtGui import QShowEvent
 from PyQt6.QtWidgets import (QDialog, QHBoxLayout, QLabel, QLineEdit,
                              QMainWindow, QMessageBox, QPushButton,
                              QSizePolicy, QSpacerItem, QTextEdit, QVBoxLayout)
@@ -24,7 +16,7 @@ import arcane_viewer.arcane as arcane
 import arcane_viewer.ui.utilities as utilities
 
 
-class ServerCertificateAddOrEditDialog(QDialog, utilities.CenterWindow):
+class ServerCertificateAddOrEditDialog(utilities.QCenteredDialog):
     def __init__(self, parent: Optional[Union[QDialog, QMainWindow]], settings: QSettings, fingerprint: str = None)\
             -> None:
         super().__init__(parent)
@@ -113,7 +105,3 @@ class ServerCertificateAddOrEditDialog(QDialog, utilities.CenterWindow):
 
     def adjust_size(self) -> None:
         self.setFixedSize(400, self.sizeHint().height())
-
-    def showEvent(self, event: QShowEvent) -> None:
-        super().showEvent(event)
-        self.center_on_owner(self.parent())

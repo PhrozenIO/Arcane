@@ -1,20 +1,13 @@
 """
-    Arcane - A secure remote desktop application for Windows with the
-    particularity of having a server entirely written in PowerShell and
-    a cross-platform client (Python/QT6).
-
     Author: Jean-Pierre LESUEUR (@DarkCoderSc)
     License: Apache License 2.0
-    https://github.com/PhrozenIO
-    https://github.com/DarkCoderSc
-    https://twitter.com/DarkCoderSc
-    www.phrozen.io
+    More information about the LICENSE on the LICENSE file in the root directory of the project.
 """
 
 from typing import Optional, Union
 
 from PyQt6.QtCore import QSize, Qt
-from PyQt6.QtGui import QIcon, QShowEvent
+from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import (QDialog, QHBoxLayout, QLabel, QMainWindow,
                              QProgressBar, QSizePolicy, QSpacerItem,
                              QVBoxLayout)
@@ -23,7 +16,7 @@ import arcane_viewer.arcane as arcane
 import arcane_viewer.ui.utilities as utilities
 
 
-class ConnectingWindow(QDialog, utilities.CenterWindow):
+class ConnectingWindow(utilities.QCenteredDialog):
     def __init__(self, parent: Optional[Union[QDialog, QMainWindow]] = None) -> None:
         super().__init__(parent)
 
@@ -59,7 +52,3 @@ class ConnectingWindow(QDialog, utilities.CenterWindow):
 
         spacer_bottom = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
         info_layout.addItem(spacer_bottom)
-
-    def showEvent(self, event: QShowEvent) -> None:
-        super().showEvent(event)
-        self.center_on_owner(self.parent())

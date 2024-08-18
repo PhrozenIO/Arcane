@@ -1,14 +1,7 @@
 """
-    Arcane - A secure remote desktop application for Windows with the
-    particularity of having a server entirely written in PowerShell and
-    a cross-platform client (Python/QT6).
-
     Author: Jean-Pierre LESUEUR (@DarkCoderSc)
     License: Apache License 2.0
-    https://github.com/PhrozenIO
-    https://github.com/DarkCoderSc
-    https://twitter.com/DarkCoderSc
-    www.phrozen.io
+    More information about the LICENSE on the LICENSE file in the root directory of the project.
 
     Todo:
         - (0001) : Implement remote screen resolution update, if it does, we will need to ensure it push an update of
@@ -16,7 +9,7 @@
 """
 
 import logging
-from typing import List, Union
+from typing import List, Optional, Union
 
 from PyQt6.QtCore import QRect, QSize, Qt, pyqtSlot
 from PyQt6.QtGui import (QCloseEvent, QImage, QPainter, QPixmap, QResizeEvent,
@@ -25,9 +18,9 @@ from PyQt6.QtWidgets import (QApplication, QDialog, QGraphicsPixmapItem,
                              QMainWindow, QMessageBox)
 
 import arcane_viewer.arcane as arcane
-import arcane_viewer.arcane.threads as arcane_threads
 import arcane_viewer.ui.custom_widgets as arcane_widgets
 import arcane_viewer.ui.dialogs as arcane_dialogs
+from arcane_viewer.arcane.threads import EventsThread, VirtualDesktopThread
 
 logger = logging.getLogger(__name__)
 
@@ -39,9 +32,10 @@ class DesktopWindow(QMainWindow):
         self.tangent_universe = None
         self.scene_pixmap = None
         self.v_desktop = None
-        self.desktop_thread = None
-        self.events_thread = None
         self.universe_collapsed = False
+
+        self.desktop_thread: Optional[VirtualDesktopThread] = None
+        self.events_thread: Optional[EventsThread] = None
 
         self.session = session
 
@@ -79,7 +73,7 @@ class DesktopWindow(QMainWindow):
 
     def start_desktop_thread(self) -> None:
         """ Start the desktop thread to handle remote desktop streaming """
-        self.desktop_thread = arcane_threads.VirtualDesktopThread(self.session)
+        self.desktop_thread = VirtualDesktopThread(self.session)
         self.desktop_thread.chunk_received.connect(self.update_scene)
         self.desktop_thread.open_cellar_door.connect(self.open_cellar_door)
         self.desktop_thread.thread_finished.connect(self.thread_finished)
@@ -88,7 +82,7 @@ class DesktopWindow(QMainWindow):
 
     def start_events_thread(self, screen: arcane.Screen) -> None:
         """ Start the events thread to handle remote desktop events """
-        self.events_thread = arcane_threads.EventsThread(self.session)
+        self.events_thread = EventsThread(self.session)
         self.events_thread.thread_finished.connect(self.thread_finished)
         self.events_thread.start()
 

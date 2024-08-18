@@ -1,14 +1,7 @@
 """
-    Arcane - A secure remote desktop application for Windows with the
-    particularity of having a server entirely written in PowerShell and
-    a cross-platform client (Python/QT6).
-
     Author: Jean-Pierre LESUEUR (@DarkCoderSc)
     License: Apache License 2.0
-    https://github.com/PhrozenIO
-    https://github.com/DarkCoderSc
-    https://twitter.com/DarkCoderSc
-    www.phrozen.io
+    More information about the LICENSE on the LICENSE file in the root directory of the project.
 """
 
 import json
@@ -16,10 +9,10 @@ import os.path
 import socket
 
 from PyQt6.QtCore import QSettings, QSize, Qt, pyqtSlot
-from PyQt6.QtGui import QIcon, QShowEvent
+from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import (QDialog, QHBoxLayout, QLabel, QLineEdit,
-                             QMainWindow, QMessageBox, QPushButton, QSpinBox,
-                             QVBoxLayout, QWidget)
+                             QMessageBox, QPushButton, QSpinBox, QVBoxLayout,
+                             QWidget)
 
 import arcane_viewer.arcane as arcane
 import arcane_viewer.arcane.threads as arcane_threads
@@ -28,7 +21,7 @@ import arcane_viewer.ui.forms as arcane_forms
 import arcane_viewer.ui.utilities as utilities
 
 
-class ConnectWindow(QMainWindow, utilities.CenterWindow):
+class ConnectWindow(utilities.QCenteredMainWindow):
     """ Connect Window to establish a connection to the server """
 
     def __init__(self) -> None:
@@ -130,10 +123,6 @@ class ConnectWindow(QMainWindow, utilities.CenterWindow):
         self.read_default()
 
         self.adjust_size()
-
-    def showEvent(self, event: QShowEvent) -> None:
-        super().showEvent(event)
-        self.center_on_owner()
 
     def read_default(self) -> None:
         """ Read default settings from the default.json file """

@@ -1,14 +1,7 @@
 """
-    Arcane - A secure remote desktop application for Windows with the
-    particularity of having a server entirely written in PowerShell and
-    a cross-platform client (Python/QT6).
-
     Author: Jean-Pierre LESUEUR (@DarkCoderSc)
     License: Apache License 2.0
-    https://github.com/PhrozenIO
-    https://github.com/DarkCoderSc
-    https://twitter.com/DarkCoderSc
-    www.phrozen.io
+    More information about the LICENSE on the LICENSE file in the root directory of the project.
 """
 
 from typing import Optional, Union
@@ -28,8 +21,10 @@ from .options_dialogs import ServerCertificateAddOrEditDialog
 
 class RemoteDesktopOptionsTab(QWidget):
     """ Remote Desktop Options Tab """
-    def __init__(self, settings: QSettings) -> None:
+    def __init__(self, parent: QDialog, settings: QSettings) -> None:
         super().__init__()
+
+        self.parent = parent
 
         self.settings = settings
 
@@ -136,8 +131,10 @@ class TrustedCertificateModel(QStandardItemModel):
 
 class TrustedCertificatesOptionsTab(QWidget):
     """ Trusted Certificates Options Tab """
-    def __init__(self, settings: QSettings) -> None:
+    def __init__(self, parent: QDialog, settings: QSettings) -> None:
         super().__init__()
+
+        self.parent = parent
 
         self.settings = settings
 
@@ -212,7 +209,7 @@ class TrustedCertificatesOptionsTab(QWidget):
         if edit_selected and self.tree_view.currentIndex().isValid():
             fingerprint = self.model.item(self.tree_view.currentIndex().row(), 1).text()
 
-        dialog = ServerCertificateAddOrEditDialog(self, self.settings, fingerprint)
+        dialog = ServerCertificateAddOrEditDialog(self.parent, self.settings, fingerprint)
         dialog.exec()
 
         if dialog.result() == QDialog.DialogCode.Accepted:
@@ -279,7 +276,7 @@ class TrustedCertificatesOptionsTab(QWidget):
         self.settings.setValue(arcane.SETTINGS_KEY_TRUSTED_CERTIFICATES, certificates)
 
 
-class OptionsDialog(QDialog, utilities.CenterWindow):
+class OptionsDialog(utilities.QCenteredDialog):
     """ Arcane Options Dialog """
     def __init__(self, parent: Optional[Union[QDialog, QMainWindow]] = None) -> None:
         super().__init__(parent)
@@ -303,11 +300,11 @@ class OptionsDialog(QDialog, utilities.CenterWindow):
         core_layout.addWidget(self.options_tab_widget)
 
         # General Tab
-        self.remote_desktop_tab = RemoteDesktopOptionsTab(self.settings)
+        self.remote_desktop_tab = RemoteDesktopOptionsTab(self, self.settings)
         self.options_tab_widget.addTab(self.remote_desktop_tab, "Remote Desktop")
 
         # Trusted Certificates Tab
-        self.trusted_certificates_tab = TrustedCertificatesOptionsTab(self.settings)
+        self.trusted_certificates_tab = TrustedCertificatesOptionsTab(self, self.settings)
         self.options_tab_widget.addTab(self.trusted_certificates_tab, "Trusted Certificates")
 
         # Action Buttons
@@ -360,7 +357,5 @@ class OptionsDialog(QDialog, utilities.CenterWindow):
 
     def showEvent(self, event: QShowEvent) -> None:
         super().showEvent(event)
-
-        self.center_on_owner(self.parent())
 
         self.load_settings()

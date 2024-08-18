@@ -1,31 +1,22 @@
 """
-    Arcane - A secure remote desktop application for Windows with the
-    particularity of having a server entirely written in PowerShell and
-    a cross-platform client (Python/QT6).
-
     Author: Jean-Pierre LESUEUR (@DarkCoderSc)
     License: Apache License 2.0
-    https://github.com/PhrozenIO
-    https://github.com/DarkCoderSc
-    https://twitter.com/DarkCoderSc
-    www.phrozen.io
+    More information about the LICENSE on the LICENSE file in the root directory of the project.
 """
 
-from typing import Union
-
-from PyQt6.QtGui import QFont
-from PyQt6.QtWidgets import QDialog, QMainWindow
+from PyQt6.QtGui import QFont, QShowEvent
+from PyQt6.QtWidgets import QDialog, QMainWindow, QWidget
 
 MONOSPACE_FONTS = QFont("Consolas, 'Courier New', Monaco, 'DejaVu Sans Mono', 'Liberation Mono', monospace")
 
 
-class CenterWindow:
-    """ Mixin to center a window on the screen or on another window """
-    def center_on_owner(self: Union[QDialog, QMainWindow], owner: Union[QDialog, QMainWindow] = None) -> None:
-        if owner is None:
+class CenteredWindowMixin(QWidget):
+    """ Mixin to center a widget on the screen or on another widget """
+    def center_on_owner(self) -> None:
+        if self.parent() is None:
             owner_geometry = self.screen().availableGeometry()
         else:
-            owner_geometry = owner.frameGeometry()
+            owner_geometry = self.parent().frameGeometry()
 
         subform_geometry = self.frameGeometry()
 
@@ -33,3 +24,13 @@ class CenterWindow:
 
         subform_geometry.moveCenter(center_point)
         self.move(subform_geometry.topLeft())
+
+
+class QCenteredDialog(QDialog, CenteredWindowMixin):
+    def showEvent(self, event: QShowEvent) -> None:
+        self.center_on_owner()
+
+
+class QCenteredMainWindow(QMainWindow, CenteredWindowMixin):
+    def showEvent(self, event: QShowEvent) -> None:
+        self.center_on_owner()

@@ -1,14 +1,7 @@
 """
-    Arcane - A secure remote desktop application for Windows with the
-    particularity of having a server entirely written in PowerShell and
-    a cross-platform client (Python/QT6).
-
     Author: Jean-Pierre LESUEUR (@DarkCoderSc)
     License: Apache License 2.0
-    https://github.com/PhrozenIO
-    https://github.com/DarkCoderSc
-    https://twitter.com/DarkCoderSc
-    www.phrozen.io
+    More information about the LICENSE on the LICENSE file in the root directory of the project.
 
     Description:
         Client class that handles secure communication with a remote
@@ -118,13 +111,13 @@ class Client:
 
         logger.debug(f"Received challenge: `{challenge}`, attempt to solve it with defined password...")
 
-        challenge_solution = hashlib.pbkdf2_hmac(
+        challenge_solution_as_bytes = hashlib.pbkdf2_hmac(
             "sha512",
             password.encode("utf-8"),
             challenge.encode("utf-8"),
             1000
         )
-        challenge_solution = binascii.hexlify(challenge_solution)\
+        challenge_solution = binascii.hexlify(challenge_solution_as_bytes)\
             .decode("utf-8").upper()
 
         logger.debug(f"Challenge solved: `{challenge_solution}`, sending solution to server...")
