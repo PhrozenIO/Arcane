@@ -6,8 +6,9 @@
 
 import logging
 from abc import abstractmethod
+from typing import Optional
 
-from PyQt6.QtCore import QThread, pyqtSignal, pyqtSlot
+from PyQt6.QtCore import QMutex, QThread, pyqtSignal, pyqtSlot
 
 import arcane_viewer.arcane as arcane
 
@@ -25,8 +26,10 @@ class ClientBaseThread(QThread):
 
         self._running = True
         self._connected = False
+        self._mutex = QMutex()
+
         self.session = session
-        self.client = None
+        self.client: Optional[arcane.Client] = None
         self.worker_kind = worker_kind
 
     def run(self) -> None:
@@ -47,8 +50,7 @@ class ClientBaseThread(QThread):
                 logger.error(f"Thread `{self.__class__.__name__}` encountered an error: `{e}`")
                 on_error = True
         finally:
-            if self.client is not None:
-                self.client.close()
+            self.stop()
 
             self.thread_finished.emit(on_error)
 
@@ -58,7 +60,11 @@ class ClientBaseThread(QThread):
 
     @pyqtSlot()
     def stop(self) -> None:
-        self._running = False
+        self._mutex.lock()
+        try:
+            if self.client is not None:
+                self.client.close()
 
-        if self.client is not None:
-            self.client.close()
+            self._running = False
+        finally:
+            self._mutex.unlock()

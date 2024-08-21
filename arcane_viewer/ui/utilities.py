@@ -4,6 +4,8 @@
     More information about the LICENSE on the LICENSE file in the root directory of the project.
 """
 
+from typing import Optional
+
 from PyQt6.QtGui import QFont, QShowEvent
 from PyQt6.QtWidgets import QDialog, QMainWindow, QWidget
 
@@ -13,10 +15,15 @@ MONOSPACE_FONTS = QFont("Consolas, 'Courier New', Monaco, 'DejaVu Sans Mono', 'L
 class CenteredWindowMixin(QWidget):
     """ Mixin to center a widget on the screen or on another widget """
     def center_on_owner(self) -> None:
-        if self.parent() is None:
-            owner_geometry = self.screen().availableGeometry()
+        parent = self.parent()
+        screen = self.screen()
+
+        if parent is not None:
+            owner_geometry = parent.frameGeometry()
+        elif screen is not None:
+            owner_geometry = screen.availableGeometry()
         else:
-            owner_geometry = self.parent().frameGeometry()
+            return
 
         subform_geometry = self.frameGeometry()
 
@@ -27,10 +34,10 @@ class CenteredWindowMixin(QWidget):
 
 
 class QCenteredDialog(QDialog, CenteredWindowMixin):
-    def showEvent(self, event: QShowEvent) -> None:
+    def showEvent(self, event: Optional[QShowEvent]) -> None:
         self.center_on_owner()
 
 
 class QCenteredMainWindow(QMainWindow, CenteredWindowMixin):
-    def showEvent(self, event: QShowEvent) -> None:
+    def showEvent(self, event: Optional[QShowEvent]) -> None:
         self.center_on_owner()

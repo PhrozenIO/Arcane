@@ -16,7 +16,7 @@ import arcane_viewer.arcane as arcane
 import arcane_viewer.ui.utilities as utilities
 
 
-class AboutWindow(utilities.QCenteredDialog):
+class AboutDialog(utilities.QCenteredDialog):
     def __init__(self, parent: Optional[Union[QDialog, QMainWindow]] = None) -> None:
         super().__init__(parent)
 

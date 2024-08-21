@@ -21,10 +21,10 @@ from .options_dialogs import ServerCertificateAddOrEditDialog
 
 class RemoteDesktopOptionsTab(QWidget):
     """ Remote Desktop Options Tab """
-    def __init__(self, parent: QDialog, settings: QSettings) -> None:
+    def __init__(self, options_dialog: QDialog, settings: QSettings) -> None:
         super().__init__()
 
-        self.parent = parent
+        self.options_dialog = options_dialog
 
         self.settings = settings
 
@@ -131,10 +131,13 @@ class TrustedCertificateModel(QStandardItemModel):
 
 class TrustedCertificatesOptionsTab(QWidget):
     """ Trusted Certificates Options Tab """
-    def __init__(self, parent: QDialog, settings: QSettings) -> None:
+    def __init__(self, options_dialog: QDialog, settings: QSettings) -> None:
         super().__init__()
 
-        self.parent = parent
+        # I'm using `options_dialog` property instead of parent property `super().__init__(parent)` because it seems
+        # that using the parent property is flawed in some cases, until I find a better solution, I will use this
+        # method.
+        self.options_dialog = options_dialog
 
         self.settings = settings
 
@@ -149,7 +152,11 @@ class TrustedCertificatesOptionsTab(QWidget):
 
         self.tree_view.setModel(self.model)
         self.tree_view.setRootIsDecorated(False)
-        self.tree_view.selectionModel().selectionChanged.connect(self.tree_view_selection_changed)
+
+        selection_model = self.tree_view.selectionModel()
+        if selection_model is not None:
+            selection_model.selectionChanged.connect(self.tree_view_selection_changed)
+
         self.tree_view.setSelectionBehavior(QTreeView.SelectionBehavior.SelectRows)
 
         # Setup Action Buttons
@@ -174,11 +181,25 @@ class TrustedCertificatesOptionsTab(QWidget):
 
     def add_or_edit_row(self, fingerprint: str, display_name: str, description: str) -> None:
         """ Add a certificate to the list """
+        if self.model is None:
+            return
+
         # Edit row if it already exists
         for i in range(self.model.rowCount()):
-            if self.model.item(i, 1).text() == fingerprint:
-                self.model.item(i, 0).setText(display_name)
-                self.model.item(i, 2).setText(description)
+            col_display_name = self.model.item(i, 0)
+            col_fingerprint = self.model.item(i, 1)
+            col_description = self.model.item(i, 2)
+
+            if any(column is None for column in [
+                col_display_name,
+                col_fingerprint,
+                col_description
+            ]):
+                continue
+
+            if col_fingerprint.text() == fingerprint:  # type: ignore[union-attr]
+                col_display_name.setText(display_name)  # type: ignore[union-attr]
+                col_description.setText(description)  # type: ignore[union-attr]
 
                 return
 
@@ -205,11 +226,18 @@ class TrustedCertificatesOptionsTab(QWidget):
 
     def add_or_edit_certificate(self, edit_selected: bool) -> None:
         """ Add or edit a certificate """
+        if self.model is None:
+            return
+
         fingerprint = None
         if edit_selected and self.tree_view.currentIndex().isValid():
-            fingerprint = self.model.item(self.tree_view.currentIndex().row(), 1).text()
+            col_fingerprint = self.model.item(self.tree_view.currentIndex().row(), 1)
+            if col_fingerprint is None:
+                return
 
-        dialog = ServerCertificateAddOrEditDialog(self.parent, self.settings, fingerprint)
+            fingerprint = col_fingerprint.text()
+
+        dialog = ServerCertificateAddOrEditDialog(self.options_dialog, self.settings, fingerprint)
         dialog.exec()
 
         if dialog.result() == QDialog.DialogCode.Accepted:
@@ -254,26 +282,38 @@ class TrustedCertificatesOptionsTab(QWidget):
 
     def save_settings(self) -> None:
         """ Save trusted certificates to the settings """
-        certificates = []
-        for i in range(self.model.rowCount()):
-            certificate = self.model.item(i, 1).text().upper().strip()
+        if self.model is None:
+            return
 
-            certificates.append(certificate)
+        fingerprints = []
+        for i in range(self.model.rowCount()):
+            col_display_name = self.model.item(i, 0)
+            col_fingerprint = self.model.item(i, 1)
+            col_description = self.model.item(i, 2)
+
+            if any(column is None for column in [
+                col_display_name,
+                col_fingerprint,
+                col_description
+            ]):
+                continue
+
+            fingerprint = col_fingerprint.text().upper().strip()  # type: ignore[union-attr]
+
+            fingerprints.append(fingerprint)
 
             # Save extra information about the certificate
-            certificate_information = {
-                "display_name": self.model.item(i, 0).text(),
-                "description": self.model.item(i, 2).text(),
-                # Additional extra information fields to be placed here (if any are added in the future)
-            }
-
             self.settings.setValue(
-                f"{arcane.SETTINGS_KEY_TRUSTED_CERTIFICATES}.{certificate}",
-                certificate_information
+                f"{arcane.SETTINGS_KEY_TRUSTED_CERTIFICATES}.{fingerprint}",
+                {
+                    "display_name": col_display_name.text(),  # type: ignore[union-attr]
+                    "description": col_description.text(),  # type: ignore[union-attr]
+                    # Additional extra information fields to be placed here (if any are added in the future)
+                }
             )
 
         # Save the list of trusted certificates (Just the fingerprints)
-        self.settings.setValue(arcane.SETTINGS_KEY_TRUSTED_CERTIFICATES, certificates)
+        self.settings.setValue(arcane.SETTINGS_KEY_TRUSTED_CERTIFICATES, fingerprints)
 
 
 class OptionsDialog(utilities.QCenteredDialog):

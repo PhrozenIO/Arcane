@@ -7,6 +7,7 @@
 import json
 import os.path
 import socket
+from typing import Optional
 
 from PyQt6.QtCore import QSettings, QSize, Qt, pyqtSlot
 from PyQt6.QtGui import QIcon
@@ -27,10 +28,10 @@ class ConnectWindow(utilities.QCenteredMainWindow):
     def __init__(self) -> None:
         super().__init__()
 
-        self.__connect_thread = None
-        self.__connecting_form = None
-        self.desktop_window = None
-        self.session = None
+        self.__connect_thread: Optional[arcane_threads.ConnectThread] = None
+        self.__connecting_dialog: Optional[arcane_dialogs.ConnectingDialog] = None
+        self.desktop_window: Optional[arcane_forms.DesktopWindow] = None
+        self.session: Optional[arcane.Session] = None
 
         self.setWindowTitle(f"{arcane.APP_DISPLAY_NAME} :: Connect")
 
@@ -182,7 +183,7 @@ class ConnectWindow(utilities.QCenteredMainWindow):
         self.setFixedSize(350, self.sizeHint().height())
 
     def show_about_dialog(self) -> None:
-        about_window = arcane_dialogs.AboutWindow(self)
+        about_window = arcane_dialogs.AboutDialog(self)
         about_window.exec()
 
     @pyqtSlot(str)
@@ -191,14 +192,14 @@ class ConnectWindow(utilities.QCenteredMainWindow):
 
     @pyqtSlot()
     def connect_thread_started(self) -> None:
-        self.__connecting_form = arcane_dialogs.ConnectingWindow(self)
-        self.__connecting_form.exec()
+        self.__connecting_dialog = arcane_dialogs.ConnectingDialog(self)
+        self.__connecting_dialog.exec()
 
     @pyqtSlot(object)
-    def connect_thread_finished(self, session: arcane.Session = None) -> None:
+    def connect_thread_finished(self, session: Optional[arcane.Session] = None) -> None:
         # Close the connecting form if it is still open
-        if self.__connecting_form is not None and self.__connecting_form.isVisible():
-            self.__connecting_form.close()
+        if self.__connecting_dialog is not None and self.__connecting_dialog.isVisible():
+            self.__connecting_dialog.close()
 
         if session is None:
             return

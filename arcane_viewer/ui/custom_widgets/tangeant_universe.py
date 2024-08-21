@@ -12,6 +12,7 @@
 
 import logging
 from sys import platform
+from typing import Optional, Tuple
 
 from PyQt6.QtCore import Qt, pyqtSlot
 from PyQt6.QtGui import QClipboard, QKeyEvent, QMouseEvent, QWheelEvent
@@ -37,14 +38,15 @@ class TangentUniverse(QGraphicsView):
 
         self.setMouseTracking(True)
 
-        self.events_thread = None
-        self.screen = None
+        self.events_thread: Optional[arcane_threads.EventsThread] = None
+        self.screen: Optional[arcane.Screen] = None
 
         self.scene = QGraphicsScene()
         self.setScene(self.scene)
 
         self.clipboard = QApplication.clipboard()
-        self.clipboard.dataChanged.connect(self.clipboard_data_changed)
+        if self.clipboard is not None:
+            self.clipboard.dataChanged.connect(self.clipboard_data_changed)
 
     def set_event_thread(self, events_thread: arcane_threads.EventsThread) -> None:
         """ Set the events thread """
@@ -57,7 +59,7 @@ class TangentUniverse(QGraphicsView):
         """ Set the captured screen original information """
         self.screen = screen
 
-    def fix_mouse_position(self, x: int, y: int) -> tuple[int, int]:
+    def fix_mouse_position(self, x: int, y: int) -> Tuple[int, int]:
         """ Fix the virtual desktop mouse position to the original screen position """
         if self.screen is None:
             return x, y
@@ -78,6 +80,9 @@ class TangentUniverse(QGraphicsView):
 
     def send_mouse_event(self, x: int, y: int, state: arcane.MouseState, button: arcane.MouseButton) -> None:
         """ Push mouse event to the events thread """
+        if self.events_thread is None:
+            return
+
         self.events_thread.send_mouse_event(
             x,
             y,
@@ -133,15 +138,18 @@ class TangentUniverse(QGraphicsView):
 
     def clipboard_data_changed(self) -> None:
         """ Handle clipboard data changed event """
+        if self.events_thread is None or self.clipboard is None:
+            return
+
         text = self.clipboard.text(QClipboard.Mode.Clipboard)
 
         self.events_thread.send_clipboard_text(
             text
         )
 
-    def keyPressEvent(self, event: QKeyEvent) -> None:
+    def keyPressEvent(self, event: Optional[QKeyEvent]) -> None:
         """ Override keyPressEvent method to handle key press events """
-        if self.events_thread is None:
+        if self.events_thread is None or event is None:
             return
 
         if not event.isInputEvent():
@@ -247,9 +255,9 @@ class TangentUniverse(QGraphicsView):
 
         self.events_thread.send_key_event(key_text)
 
-    def wheelEvent(self, event: QWheelEvent) -> None:
+    def wheelEvent(self, event: Optional[QWheelEvent]) -> None:
         """ Override wheelEvent method to handle mouse wheel events """
-        if self.events_thread is None:
+        if self.events_thread is None or event is None:
             return
 
         delta = event.angleDelta().y()
@@ -262,4 +270,5 @@ class TangentUniverse(QGraphicsView):
 
     @pyqtSlot(str)
     def update_clipboard(self, text: str) -> None:
-        self.clipboard.setText(text)
+        if self.clipboard is not None:
+            self.clipboard.setText(text)

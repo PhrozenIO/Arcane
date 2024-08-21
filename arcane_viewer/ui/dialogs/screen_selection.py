@@ -14,7 +14,7 @@ import arcane_viewer.arcane as arcane
 import arcane_viewer.ui.utilities as utilities
 
 
-class ScreenSelectionWindow(utilities.QCenteredDialog):
+class ScreenSelectionDialog(utilities.QCenteredDialog):
     """ Screen Selection Dialog """
     def __init__(self, parent: Optional[Union[QDialog, QMainWindow]], screens: List[arcane.Screen]) -> None:
         super().__init__(parent)

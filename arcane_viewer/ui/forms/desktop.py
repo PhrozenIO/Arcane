@@ -13,35 +13,33 @@ from typing import List, Optional, Union
 
 from PyQt6.QtCore import QRect, QSize, Qt, pyqtSlot
 from PyQt6.QtGui import (QCloseEvent, QImage, QPainter, QPixmap, QResizeEvent,
-                         QShowEvent, QTransform)
+                         QScreen, QShowEvent, QTransform)
 from PyQt6.QtWidgets import (QApplication, QDialog, QGraphicsPixmapItem,
                              QMainWindow, QMessageBox)
 
 import arcane_viewer.arcane as arcane
+import arcane_viewer.arcane.threads as arcane_threads
 import arcane_viewer.ui.custom_widgets as arcane_widgets
 import arcane_viewer.ui.dialogs as arcane_dialogs
-from arcane_viewer.arcane.threads import EventsThread, VirtualDesktopThread
 
 logger = logging.getLogger(__name__)
 
 
 class DesktopWindow(QMainWindow):
-    def __init__(self, parent: Union[QDialog, QMainWindow], session: arcane.Session) -> None:
+    def __init__(self, connect_window: Union[QDialog, QMainWindow], session: arcane.Session) -> None:
         super().__init__()
 
-        self.tangent_universe = None
-        self.scene_pixmap = None
-        self.v_desktop = None
-        self.universe_collapsed = False
+        self.scene_pixmap: Optional[QGraphicsPixmapItem] = None
+        self.v_desktop: Optional[QPixmap] = None
 
-        self.desktop_thread: Optional[VirtualDesktopThread] = None
-        self.events_thread: Optional[EventsThread] = None
+        self.desktop_thread: Optional[arcane_threads.VirtualDesktopThread] = None
+        self.events_thread: Optional[arcane_threads.EventsThread] = None
 
         self.session = session
 
-        # Instead of using QWidget parent property, we will use a custom attribute to store the parent window, this will
-        # prevent icon to disappear on Windows taskbar when a parent is set to a Window but parent is hidden.
-        self.parent = parent
+        # Instead of using QWidget parent property, we will use a custom attribute to store the "parent" window, this
+        # will prevent icon to disappear on Windows taskbar when a parent is set to a Window but parent is hidden.
+        self.connect_window = connect_window
 
         # Set Window Properties, Layout, Title, Icon and Size
         self.setWindowTitle("🖥 {} ({}) :: {} {}".format(
@@ -65,15 +63,11 @@ class DesktopWindow(QMainWindow):
         if on_error:
             QMessageBox.critical(self, "Error", "Something went wrong, check console output for more information.")
 
-            """ If one thread (desktop or events) failed, we will close the other one, it is considered as a critical
-                error """
-            self.universe_collapsed = True
-
         self.close()
 
     def start_desktop_thread(self) -> None:
         """ Start the desktop thread to handle remote desktop streaming """
-        self.desktop_thread = VirtualDesktopThread(self.session)
+        self.desktop_thread = arcane_threads.VirtualDesktopThread(self.session)
         self.desktop_thread.chunk_received.connect(self.update_scene)
         self.desktop_thread.open_cellar_door.connect(self.open_cellar_door)
         self.desktop_thread.thread_finished.connect(self.thread_finished)
@@ -82,7 +76,7 @@ class DesktopWindow(QMainWindow):
 
     def start_events_thread(self, screen: arcane.Screen) -> None:
         """ Start the events thread to handle remote desktop events """
-        self.events_thread = EventsThread(self.session)
+        self.events_thread = arcane_threads.EventsThread(self.session)
         self.events_thread.thread_finished.connect(self.thread_finished)
         self.events_thread.start()
 
@@ -105,32 +99,21 @@ class DesktopWindow(QMainWindow):
     def showEvent(self, event: QShowEvent) -> None:
         super().showEvent(event)
 
-        if self.parent is not None:
-            self.parent.hide()
+        if self.connect_window is not None:
+            self.connect_window.hide()
 
-    def closeEvent(self, event: QCloseEvent) -> None:
+    def closeEvent(self, event: Optional[QCloseEvent]) -> None:
         """ Overridden close method to handle the cleanup
             `I Hope That When The World Comes To An End, I Can Breathe A Sigh Of Relief Because There Will Be So Much To
              Look Forward To.`"""
 
-        if self.universe_collapsed:
-            do_close = True
-        else:
-            do_close = QMessageBox.question(
-                self,
-                "Close",
-                "Are you sure you want to close the remote desktop session?"
-            ) == QMessageBox.StandardButton.Yes
+        self.close_cellar_door()
 
-        if do_close:
-            self.close_cellar_door()
-
+        if event is not None:
             event.accept()
 
-            if self.parent is not None:
-                self.parent.show()
-        else:
-            event.ignore()
+        if self.connect_window is not None:
+            self.connect_window.show()
 
     def open_cellar_door(self, screen: arcane.Screen) -> None:
         """ Initialize the virtual desktop (Tangent Universe) """
@@ -141,7 +124,7 @@ class DesktopWindow(QMainWindow):
         self.tangent_universe.scene.addItem(self.scene_pixmap)
 
         # Initialize the size of virtual desktop window regarding our current monitor screen size
-        local_screen = None
+        local_screen: Optional[QScreen] = None
 
         for local_screen_candidate in QApplication.screens():
             if local_screen_candidate.geometry().intersects(self.geometry()):
@@ -151,6 +134,13 @@ class DesktopWindow(QMainWindow):
 
         if local_screen is None:
             local_screen = QApplication.primaryScreen()
+
+        if local_screen is None:
+            logger.error("Unable to find a valid screen to initialize the virtual desktop window.")
+
+            self.close()
+
+            return
 
         local_screen_size = local_screen.size()
         remote_screen_width = int(screen.width / local_screen.devicePixelRatio())
@@ -186,7 +176,11 @@ class DesktopWindow(QMainWindow):
 
     def fit_scene(self) -> None:
         """ Fit the scene (Hacky Technique) to the view """
-        if self.tangent_universe is None or self.scene_pixmap is None:
+        if (
+                self.tangent_universe is None or
+                self.scene_pixmap is None or
+                self.v_desktop is None
+        ):
             return
 
         # Instead of bellow code:
@@ -204,7 +198,7 @@ class DesktopWindow(QMainWindow):
 
     def update_scene(self, chunk: QImage, x: int, y: int) -> None:
         """ Update the virtual desktop with the received chunk """
-        if self.v_desktop is None:
+        if self.v_desktop is None or self.scene_pixmap is None:
             return
 
         if chunk is None or not isinstance(chunk, QImage):
@@ -227,15 +221,16 @@ class DesktopWindow(QMainWindow):
         self.fit_scene()
 
     def screen_selection_rejected(self) -> None:
-        self.universe_collapsed = True
         self.close()
 
     @pyqtSlot(list)
     def display_screen_selection_dialog(self, screens: List[arcane.Screen]) -> None:
         """ Display screen selection dialog """
-        screen_selection_dialog = arcane_dialogs.ScreenSelectionWindow(self, screens)
+        screen_selection_dialog = arcane_dialogs.ScreenSelectionDialog(self, screens)
+
         screen_selection_dialog.accepted.connect(lambda: self.desktop_thread.on_screen_selection_dialog_closed(
             screen_selection_dialog.get_selected_screen()
-        ))
+        ) if self.desktop_thread is not None else None)
+
         screen_selection_dialog.rejected.connect(self.screen_selection_rejected)
         screen_selection_dialog.exec()
