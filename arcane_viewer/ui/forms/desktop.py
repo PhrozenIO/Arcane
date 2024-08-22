@@ -9,7 +9,6 @@
 """
 
 import logging
-import time
 from typing import List, Optional, Union
 
 from PyQt6.QtCore import QRect, QSize, Qt, pyqtSlot
