@@ -1,25 +1,19 @@
 """
-    Arcane - A secure remote desktop application for Windows with the
-    particularity of having a server entirely written in PowerShell and
-    a cross-platform client (Python/QT6).
-
     Author: Jean-Pierre LESUEUR (@DarkCoderSc)
     License: Apache License 2.0
-    https://github.com/PhrozenIO
-    https://github.com/DarkCoderSc
-    https://twitter.com/DarkCoderSc
-    www.phrozen.io
+    More information about the LICENSE on the LICENSE file in the root directory of the project.
 """
 
 import json
 import os.path
 import socket
+from typing import Optional
 
 from PyQt6.QtCore import QSettings, QSize, Qt, pyqtSlot
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import (QDialog, QHBoxLayout, QLabel, QLineEdit,
-                             QMainWindow, QMessageBox, QPushButton, QSpinBox,
-                             QVBoxLayout, QWidget)
+                             QMessageBox, QPushButton, QSpinBox, QVBoxLayout,
+                             QWidget)
 
 import arcane_viewer.arcane as arcane
 import arcane_viewer.arcane.threads as arcane_threads
@@ -28,16 +22,16 @@ import arcane_viewer.ui.forms as arcane_forms
 import arcane_viewer.ui.utilities as utilities
 
 
-class ConnectWindow(QMainWindow, utilities.CenterWindow):
+class ConnectWindow(utilities.QCenteredMainWindow):
     """ Connect Window to establish a connection to the server """
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
-        self.__connect_thread = None
-        self.__connecting_form = None
-        self.desktop_window = None
-        self.session = None
+        self.__connect_thread: Optional[arcane_threads.ConnectThread] = None
+        self.__connecting_dialog: Optional[arcane_dialogs.ConnectingDialog] = None
+        self.desktop_window: Optional[arcane_forms.DesktopWindow] = None
+        self.session: Optional[arcane.Session] = None
 
         self.setWindowTitle(f"{arcane.APP_DISPLAY_NAME} :: Connect")
 
@@ -131,11 +125,7 @@ class ConnectWindow(QMainWindow, utilities.CenterWindow):
 
         self.adjust_size()
 
-    def showEvent(self, event):
-        super().showEvent(event)
-        self.center_on_owner()
-
-    def read_default(self):
+    def read_default(self) -> None:
         """ Read default settings from the default.json file """
         if not os.path.isfile(arcane.DEFAULT_JSON):
             return
@@ -158,7 +148,7 @@ class ConnectWindow(QMainWindow, utilities.CenterWindow):
             if "server_password" in data:
                 self.password_input.setText(data["server_password"])
 
-    def submit_form(self):
+    def submit_form(self) -> None:
         """ Validate the form and submit it """
         try:
             # Check if the ip/hostname is valid
@@ -189,29 +179,29 @@ class ConnectWindow(QMainWindow, utilities.CenterWindow):
         except Exception as e:
             QMessageBox.critical(self, "Form Error", str(e))
 
-    def adjust_size(self):
+    def adjust_size(self) -> None:
         self.setFixedSize(350, self.sizeHint().height())
 
-    def show_about_dialog(self):
-        about_window = arcane_dialogs.AboutWindow(self)
+    def show_about_dialog(self) -> None:
+        about_window = arcane_dialogs.AboutDialog(self)
         about_window.exec()
 
     @pyqtSlot(str)
-    def session_error(self, error_message):
+    def session_error(self, error_message: str) -> None:
         QMessageBox.critical(self, "Error", error_message)
 
     @pyqtSlot()
-    def connect_thread_started(self):
-        self.__connecting_form = arcane_dialogs.ConnectingWindow(self)
-        self.__connecting_form.exec()
+    def connect_thread_started(self) -> None:
+        self.__connecting_dialog = arcane_dialogs.ConnectingDialog(self)
+        self.__connecting_dialog.exec()
 
     @pyqtSlot(object)
-    def connect_thread_finished(self, session: arcane.Session = None):
+    def connect_thread_finished(self, session: Optional[arcane.Session] = None) -> None:
         # Close the connecting form if it is still open
-        if self.__connecting_form is not None and self.__connecting_form.isVisible():
-            self.__connecting_form.close()
+        if self.__connecting_dialog is not None and self.__connecting_dialog.isVisible():
+            self.__connecting_dialog.close()
 
-        if session is None:
+        if session is None or session.server_fingerprint is None:
             return
 
         self.session = session

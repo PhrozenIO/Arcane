@@ -1,22 +1,17 @@
 """
-    Arcane - A secure remote desktop application for Windows with the
-    particularity of having a server entirely written in PowerShell and
-    a cross-platform client (Python/QT6).
-
     Author: Jean-Pierre LESUEUR (@DarkCoderSc)
     License: Apache License 2.0
-    https://github.com/PhrozenIO
-    https://github.com/DarkCoderSc
-    https://twitter.com/DarkCoderSc
-    www.phrozen.io
+    More information about the LICENSE on the LICENSE file in the root directory of the project.
 """
 
-from PyQt6.QtCore import QSettings, Qt
-from PyQt6.QtGui import QStandardItem, QStandardItemModel
+from typing import Optional, Union
+
+from PyQt6.QtCore import QModelIndex, QSettings, Qt
+from PyQt6.QtGui import QShowEvent, QStandardItem, QStandardItemModel
 from PyQt6.QtWidgets import (QComboBox, QDialog, QGridLayout, QGroupBox,
-                             QHBoxLayout, QLabel, QMessageBox, QPushButton,
-                             QSizePolicy, QSpacerItem, QSpinBox, QTabWidget,
-                             QTreeView, QVBoxLayout, QWidget)
+                             QHBoxLayout, QLabel, QMainWindow, QMessageBox,
+                             QPushButton, QSizePolicy, QSpacerItem, QSpinBox,
+                             QTabWidget, QTreeView, QVBoxLayout, QWidget)
 
 import arcane_viewer.arcane as arcane
 import arcane_viewer.ui.utilities as utilities
@@ -26,8 +21,10 @@ from .options_dialogs import ServerCertificateAddOrEditDialog
 
 class RemoteDesktopOptionsTab(QWidget):
     """ Remote Desktop Options Tab """
-    def __init__(self, settings: QSettings):
+    def __init__(self, options_dialog: QDialog, settings: QSettings) -> None:
         super().__init__()
+
+        self.options_dialog = options_dialog
 
         self.settings = settings
 
@@ -39,11 +36,12 @@ class RemoteDesktopOptionsTab(QWidget):
         options_layout.setContentsMargins(0, 8, 0, 0)
         core_layout.addLayout(options_layout)
 
+        # Clipboard Sharing Mode
         clipboard_sharing_label = QLabel("Clipboard Sharing:")
 
         self.clipboard_sharing_combobox = QComboBox()
-        for value in arcane.ClipboardMode:
-            self.clipboard_sharing_combobox.addItem(value.name, userData=value)
+        for clipboard_mode in arcane.ClipboardMode:
+            self.clipboard_sharing_combobox.addItem(clipboard_mode.name, userData=clipboard_mode)
 
         options_layout.addWidget(clipboard_sharing_label, 0, 0)
         options_layout.addWidget(self.clipboard_sharing_combobox, 0, 1)
@@ -67,14 +65,14 @@ class RemoteDesktopOptionsTab(QWidget):
         # Packet Size (Optimization)
         packet_size_label = QLabel("Packet Size:")
         self.packet_size_input = QComboBox()
-        for value in arcane.PacketSize:
-            self.packet_size_input.addItem(value.display_name, userData=value)
+        for packet_size in arcane.PacketSize:
+            self.packet_size_input.addItem(packet_size.display_name, userData=packet_size)
 
         # Block Size (Optimization)
         block_size_label = QLabel("Block Size:")
         self.block_size_input = QComboBox()
-        for value in arcane.BlockSize:
-            self.block_size_input.addItem(value.display_name, userData=value)
+        for block_size in arcane.BlockSize:
+            self.block_size_input.addItem(block_size.display_name, userData=block_size)
 
         # Place Inputs in our Grid Layout
         desktop_capture_group_layout.addWidget(image_quality_label, 0, 0)
@@ -88,7 +86,7 @@ class RemoteDesktopOptionsTab(QWidget):
 
         core_layout.addItem(QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
 
-    def load_settings(self):
+    def load_settings(self) -> None:
         """ Load remote desktop settings from the settings """
         # Load Options
         self.clipboard_sharing_combobox.setCurrentIndex(
@@ -112,7 +110,7 @@ class RemoteDesktopOptionsTab(QWidget):
             )
         )
 
-    def save_settings(self):
+    def save_settings(self) -> None:
         """ Save remote desktop settings to the settings """
         # Save Options
         self.settings.setValue(arcane.SETTINGS_KEY_CLIPBOARD_MODE, self.clipboard_sharing_combobox.currentData())
@@ -125,7 +123,7 @@ class RemoteDesktopOptionsTab(QWidget):
 
 class TrustedCertificateModel(QStandardItemModel):
     """ Trusted Certificate Model (Disables editing of the fingerprint) """
-    def flags(self, index):
+    def flags(self, index:  QModelIndex) -> Qt.ItemFlag:
         if index.column() == 1:  # Fingerprint
             return Qt.ItemFlag.ItemIsSelectable | Qt.ItemFlag.ItemIsEnabled
 
@@ -134,8 +132,13 @@ class TrustedCertificateModel(QStandardItemModel):
 
 class TrustedCertificatesOptionsTab(QWidget):
     """ Trusted Certificates Options Tab """
-    def __init__(self, settings: QSettings):
+    def __init__(self, options_dialog: QDialog, settings: QSettings) -> None:
         super().__init__()
+
+        # I'm using `options_dialog` property instead of parent property `super().__init__(parent)` because it seems
+        # that using the parent property is flawed in some cases, until I find a better solution, I will use this
+        # method.
+        self.options_dialog = options_dialog
 
         self.settings = settings
 
@@ -150,7 +153,11 @@ class TrustedCertificatesOptionsTab(QWidget):
 
         self.tree_view.setModel(self.model)
         self.tree_view.setRootIsDecorated(False)
-        self.tree_view.selectionModel().selectionChanged.connect(self.tree_view_selection_changed)
+
+        selection_model = self.tree_view.selectionModel()
+        if selection_model is not None:
+            selection_model.selectionChanged.connect(self.tree_view_selection_changed)
+
         self.tree_view.setSelectionBehavior(QTreeView.SelectionBehavior.SelectRows)
 
         # Setup Action Buttons
@@ -173,13 +180,27 @@ class TrustedCertificatesOptionsTab(QWidget):
 
         action_buttons_layout.addItem(QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
 
-    def add_or_edit_row(self, fingerprint: str, display_name: str, description: str):
+    def add_or_edit_row(self, fingerprint: str, display_name: str, description: str) -> None:
         """ Add a certificate to the list """
+        if self.model is None:
+            return
+
         # Edit row if it already exists
         for i in range(self.model.rowCount()):
-            if self.model.item(i, 1).text() == fingerprint:
-                self.model.item(i, 0).setText(display_name)
-                self.model.item(i, 2).setText(description)
+            col_display_name = self.model.item(i, 0)
+            col_fingerprint = self.model.item(i, 1)
+            col_description = self.model.item(i, 2)
+
+            if any(column is None for column in [
+                col_display_name,
+                col_fingerprint,
+                col_description
+            ]):
+                continue
+
+            if col_fingerprint.text() == fingerprint:  # type: ignore[union-attr]
+                col_display_name.setText(display_name)  # type: ignore[union-attr]
+                col_description.setText(description)  # type: ignore[union-attr]
 
                 return
 
@@ -190,13 +211,13 @@ class TrustedCertificatesOptionsTab(QWidget):
             QStandardItem(description),
         ])
 
-    def tree_view_selection_changed(self):
+    def tree_view_selection_changed(self) -> None:
         """ Update the state of the action buttons based on the selection """
         b = self.tree_view.currentIndex().isValid()
         self.edit_button.setEnabled(b)
         self.remove_button.setEnabled(b)
 
-    def remove_button_clicked(self):
+    def remove_button_clicked(self) -> None:
         """ Remove the selected certificate from the list """
         selected_index = self.tree_view.currentIndex()
         if not selected_index.isValid():
@@ -204,13 +225,20 @@ class TrustedCertificatesOptionsTab(QWidget):
 
         self.model.removeRow(selected_index.row())
 
-    def add_or_edit_certificate(self, edit_selected: bool):
+    def add_or_edit_certificate(self, edit_selected: bool) -> None:
         """ Add or edit a certificate """
+        if self.model is None:
+            return
+
         fingerprint = None
         if edit_selected and self.tree_view.currentIndex().isValid():
-            fingerprint = self.model.item(self.tree_view.currentIndex().row(), 1).text()
+            col_fingerprint = self.model.item(self.tree_view.currentIndex().row(), 1)
+            if col_fingerprint is None:
+                return
 
-        dialog = ServerCertificateAddOrEditDialog(self, self.settings, fingerprint)
+            fingerprint = col_fingerprint.text()
+
+        dialog = ServerCertificateAddOrEditDialog(self.options_dialog, self.settings, fingerprint)
         dialog.exec()
 
         if dialog.result() == QDialog.DialogCode.Accepted:
@@ -220,7 +248,7 @@ class TrustedCertificatesOptionsTab(QWidget):
                 dialog.description_edit.toPlainText()
             )
 
-    def load_settings(self):
+    def load_settings(self) -> None:
         """ Load trusted certificates from the settings """
         # First we clear the list
         self.model.clear()
@@ -253,33 +281,45 @@ class TrustedCertificatesOptionsTab(QWidget):
         for i in range(self.model.columnCount()):
             self.tree_view.resizeColumnToContents(i)
 
-    def save_settings(self):
+    def save_settings(self) -> None:
         """ Save trusted certificates to the settings """
-        certificates = []
-        for i in range(self.model.rowCount()):
-            certificate = self.model.item(i, 1).text().upper().strip()
+        if self.model is None:
+            return
 
-            certificates.append(certificate)
+        fingerprints = []
+        for i in range(self.model.rowCount()):
+            col_display_name = self.model.item(i, 0)
+            col_fingerprint = self.model.item(i, 1)
+            col_description = self.model.item(i, 2)
+
+            if any(column is None for column in [
+                col_display_name,
+                col_fingerprint,
+                col_description
+            ]):
+                continue
+
+            fingerprint = col_fingerprint.text().upper().strip()  # type: ignore[union-attr]
+
+            fingerprints.append(fingerprint)
 
             # Save extra information about the certificate
-            certificate_information = {
-                "display_name": self.model.item(i, 0).text(),
-                "description": self.model.item(i, 2).text(),
-                # Additional extra information fields to be placed here (if any are added in the future)
-            }
-
             self.settings.setValue(
-                f"{arcane.SETTINGS_KEY_TRUSTED_CERTIFICATES}.{certificate}",
-                certificate_information
+                f"{arcane.SETTINGS_KEY_TRUSTED_CERTIFICATES}.{fingerprint}",
+                {
+                    "display_name": col_display_name.text(),  # type: ignore[union-attr]
+                    "description": col_description.text(),  # type: ignore[union-attr]
+                    # Additional extra information fields to be placed here (if any are added in the future)
+                }
             )
 
         # Save the list of trusted certificates (Just the fingerprints)
-        self.settings.setValue(arcane.SETTINGS_KEY_TRUSTED_CERTIFICATES, certificates)
+        self.settings.setValue(arcane.SETTINGS_KEY_TRUSTED_CERTIFICATES, fingerprints)
 
 
-class OptionsDialog(QDialog, utilities.CenterWindow):
+class OptionsDialog(utilities.QCenteredDialog):
     """ Arcane Options Dialog """
-    def __init__(self, parent):
+    def __init__(self, parent: Optional[Union[QDialog, QMainWindow]] = None) -> None:
         super().__init__(parent)
 
         self.settings = QSettings(arcane.APP_ORGANIZATION_NAME, arcane.APP_NAME)
@@ -301,11 +341,11 @@ class OptionsDialog(QDialog, utilities.CenterWindow):
         core_layout.addWidget(self.options_tab_widget)
 
         # General Tab
-        self.remote_desktop_tab = RemoteDesktopOptionsTab(self.settings)
+        self.remote_desktop_tab = RemoteDesktopOptionsTab(self, self.settings)
         self.options_tab_widget.addTab(self.remote_desktop_tab, "Remote Desktop")
 
         # Trusted Certificates Tab
-        self.trusted_certificates_tab = TrustedCertificatesOptionsTab(self.settings)
+        self.trusted_certificates_tab = TrustedCertificatesOptionsTab(self, self.settings)
         self.options_tab_widget.addTab(self.trusted_certificates_tab, "Trusted Certificates")
 
         # Action Buttons
@@ -333,17 +373,17 @@ class OptionsDialog(QDialog, utilities.CenterWindow):
 
         self.adjust_size()
 
-    def load_settings(self):
+    def load_settings(self) -> None:
         self.remote_desktop_tab.load_settings()
         self.trusted_certificates_tab.load_settings()
 
-    def save_settings(self):
+    def save_settings(self) -> None:
         self.remote_desktop_tab.save_settings()
         self.trusted_certificates_tab.save_settings()
 
         self.accept()
 
-    def reset_settings(self):
+    def reset_settings(self) -> None:
         if QMessageBox.question(
                 self,
                 "Reset Settings",
@@ -353,10 +393,10 @@ class OptionsDialog(QDialog, utilities.CenterWindow):
 
             self.load_settings()
 
-    def adjust_size(self):
+    def adjust_size(self) -> None:
         self.setFixedSize(420, self.sizeHint().height())
 
-    def showEvent(self, event):
+    def showEvent(self, event: Optional[QShowEvent]) -> None:
         super().showEvent(event)
 
         self.load_settings()

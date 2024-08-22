@@ -1,31 +1,29 @@
 """
-    Arcane - A secure remote desktop application for Windows with the
-    particularity of having a server entirely written in PowerShell and
-    a cross-platform client (Python/QT6).
-
     Author: Jean-Pierre LESUEUR (@DarkCoderSc)
     License: Apache License 2.0
-    https://github.com/PhrozenIO
-    https://github.com/DarkCoderSc
-    https://twitter.com/DarkCoderSc
-    www.phrozen.io
+    More information about the LICENSE on the LICENSE file in the root directory of the project.
 """
 
-from typing import Union
+from typing import Optional
 
-from PyQt6.QtGui import QFont
-from PyQt6.QtWidgets import QDialog, QMainWindow
+from PyQt6.QtGui import QFont, QShowEvent
+from PyQt6.QtWidgets import QDialog, QMainWindow, QWidget
 
 MONOSPACE_FONTS = QFont("Consolas, 'Courier New', Monaco, 'DejaVu Sans Mono', 'Liberation Mono', monospace")
 
 
-class CenterWindow:
-    """ Mixin to center a window on the screen or on another window """
-    def center_on_owner(self: Union[QDialog, QMainWindow], owner: Union[QDialog, QMainWindow] = None):
-        if owner is None:
-            owner_geometry = self.screen().availableGeometry()
+class CenteredWindowMixin(QWidget):
+    """ Mixin to center a widget on the screen or on another widget """
+    def center_on_owner(self) -> None:
+        parent = self.parent()
+        screen = self.screen()
+
+        if parent is not None and isinstance(parent, QWidget):
+            owner_geometry = parent.frameGeometry()
+        elif screen is not None:
+            owner_geometry = screen.availableGeometry()
         else:
-            owner_geometry = owner.frameGeometry()
+            return
 
         subform_geometry = self.frameGeometry()
 
@@ -33,3 +31,13 @@ class CenterWindow:
 
         subform_geometry.moveCenter(center_point)
         self.move(subform_geometry.topLeft())
+
+
+class QCenteredDialog(QDialog, CenteredWindowMixin):
+    def showEvent(self, event: Optional[QShowEvent]) -> None:
+        self.center_on_owner()
+
+
+class QCenteredMainWindow(QMainWindow, CenteredWindowMixin):
+    def showEvent(self, event: Optional[QShowEvent]) -> None:
+        self.center_on_owner()

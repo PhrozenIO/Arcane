@@ -1,17 +1,11 @@
 """
-    Arcane - A secure remote desktop application for Windows with the
-    particularity of having a server entirely written in PowerShell and
-    a cross-platform client (Python/QT6).
-
     Author: Jean-Pierre LESUEUR (@DarkCoderSc)
     License: Apache License 2.0
-    https://github.com/PhrozenIO
-    https://github.com/DarkCoderSc
-    https://twitter.com/DarkCoderSc
-    www.phrozen.io
+    More information about the LICENSE on the LICENSE file in the root directory of the project.
 """
 
 import logging
+import ssl
 from json.decoder import JSONDecodeError
 
 from PyQt6.QtCore import Qt, pyqtSignal, pyqtSlot
@@ -27,16 +21,21 @@ class EventsThread(ClientBaseThread):
     update_mouse_cursor = pyqtSignal(Qt.CursorShape)
     update_clipboard = pyqtSignal(str)
 
-    def __init__(self, session: arcane.Session):
+    def __init__(self, session: arcane.Session) -> None:
         super().__init__(session, arcane.WorkerKind.Events)
 
-    def client_execute(self):
+    def client_execute(self) -> None:
         """ Execute the client thread """
+        if self.client is None:
+            return
+
         while self._running:
             try:
                 event = self.client.read_json()
             except JSONDecodeError:
                 continue
+            except (OSError, ssl.SSLError, ssl.SSLEOFError):
+                break
 
             if event is None or "Id" not in event:
                 continue
@@ -91,7 +90,7 @@ class EventsThread(ClientBaseThread):
                 self.update_clipboard.emit(event["Text"])
 
     @pyqtSlot(int, int, arcane.MouseState, arcane.MouseButton)
-    def send_mouse_event(self, x: int, y: int, state: arcane.MouseState, button: arcane.MouseButton):
+    def send_mouse_event(self, x: int, y: int, state: arcane.MouseState, button: arcane.MouseButton) -> None:
         """ Send mouse event to the server """
         if self.session.presentation:
             return
@@ -108,7 +107,7 @@ class EventsThread(ClientBaseThread):
             )
 
     @pyqtSlot(str)
-    def send_key_event(self, keys: str):
+    def send_key_event(self, keys: str) -> None:
         """ Send keyboard event to the server """
         if self.session.presentation:
             return
@@ -122,7 +121,7 @@ class EventsThread(ClientBaseThread):
             )
 
     @pyqtSlot(int)
-    def send_mouse_wheel_event(self, delta: int):
+    def send_mouse_wheel_event(self, delta: int) -> None:
         """ Send mouse wheel event to the server """
         if self.session.presentation:
             return
@@ -136,7 +135,7 @@ class EventsThread(ClientBaseThread):
             )
 
     @pyqtSlot(str)
-    def send_clipboard_text(self, text: str):
+    def send_clipboard_text(self, text: str) -> None:
         """ Send clipboard text to the server """
         if self.session.clipboard_mode in {
             arcane.ClipboardMode.Disabled, arcane.ClipboardMode.Receive

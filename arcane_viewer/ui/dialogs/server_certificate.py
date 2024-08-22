@@ -1,25 +1,20 @@
 """
-    Arcane - A secure remote desktop application for Windows with the
-    particularity of having a server entirely written in PowerShell and
-    a cross-platform client (Python/QT6).
-
     Author: Jean-Pierre LESUEUR (@DarkCoderSc)
     License: Apache License 2.0
-    https://github.com/PhrozenIO
-    https://github.com/DarkCoderSc
-    https://twitter.com/DarkCoderSc
-    www.phrozen.io
+    More information about the LICENSE on the LICENSE file in the root directory of the project.
 """
+
+from typing import Optional, Union
 
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (QCheckBox, QDialog, QHBoxLayout, QLabel,
-                             QPushButton, QVBoxLayout)
+                             QMainWindow, QPushButton, QVBoxLayout)
 
 import arcane_viewer.ui.utilities as utilities
 
 
-class ServerCertificateDialog(QDialog, utilities.CenterWindow):
-    def __init__(self, parent, fingerprint: str):
+class ServerCertificateDialog(utilities.QCenteredDialog):
+    def __init__(self, parent: Optional[Union[QDialog, QMainWindow]], fingerprint: str) -> None:
         super().__init__(parent)
 
         self.setWindowTitle("Unknown Server Certificate")
@@ -75,7 +70,7 @@ class ServerCertificateDialog(QDialog, utilities.CenterWindow):
 
         self.adjust_size()
 
-    def setup_fingerprint_layout(self, start: int, end: int):
+    def setup_fingerprint_layout(self, start: int, end: int) -> QHBoxLayout:
         layout = QHBoxLayout()
         line = [self.fingerprint[i:i + 2] for i in range(start, end, 2)]
 
@@ -92,7 +87,7 @@ class ServerCertificateDialog(QDialog, utilities.CenterWindow):
 
         return layout
 
-    def adjust_size(self):
+    def adjust_size(self) -> None:
         self.setFixedSize(
             self.sizeHint().width(),
             self.sizeHint().height()

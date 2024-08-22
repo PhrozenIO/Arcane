@@ -13,7 +13,7 @@ preflight_question() {
   response=$(echo "$response" | tr '[:upper:]' '[:lower:]')
 
   if [ "$response" != "y" ]; then
-    echo "(!) Please do it!"
+    echo "(!) Do it!"
     exit 1
   fi
 }
@@ -23,6 +23,9 @@ skip_tox=false
 
 # arg: --skip-flake
 skip_flake=false
+
+# arg: --skip-mypy
+skip_mypy=false
 
 # Parse arguments
 for arg in "$@"; do
@@ -36,6 +39,11 @@ for arg in "$@"; do
       skip_flake=true
       shift
       ;;
+
+    --skip-mypy)
+      skip_mypy=true
+      shift
+      ;;
     *)
       ;;
   esac
@@ -46,41 +54,47 @@ preflight_question "Have you updated the arcane_viewer.arcane.constants.APP_VERS
 preflight_question "Is this version reflected on the setup.py"
 
 # Clean up things
-echo "Cleaning up things..."
+echo "[+] Cleaning up things..."
 rm -f dist/*.tar.gz
 rm -f dist/*.whl
 
 # Tox testing
 if [ "$skip_tox" = false ]; then
-  echo "Running Tox Testing..."
+  echo "[+] Tox..."
   tox
   if [ $? -ne 0 ]; then
-    echo "(!) Tox Testing Failed!"
+    echo "(!) Failed!"
     exit 1
   fi
 fi
 
-# Active Python 3.12 Virtual Environment
-source venv/312/bin/activate
-
 # Run isort
-echo "Running isort..."
+echo "[+] isort..."
 isort .
 
 # Flake8 Testing
 if [ "$skip_flake" = false ]; then
+  echo "[+] Flake8..."
   flake8 .
   if [ $? -ne 0 ]; then
-    echo "(!) Flake8 Testing Failed!"
+    echo "(!) Failed!"
     exit 2
   fi
 fi
 
+# mypy Testing
+if [ "$skip_mypy" = false ]; then
+  echo "[+] Mypy..."
+  mypy .
+  if [ $? -ne 0 ]; then
+    echo "(!) Failed!"
+    exit 3
+  fi
+fi
+
 # Build Package
-echo "Building Package..."
+echo "[+] Building Package..."
 python setup.py sdist bdist_wheel
 python setup.py clean --all
 
-deactivate
-
-echo "Done."
+echo "[*] Done."

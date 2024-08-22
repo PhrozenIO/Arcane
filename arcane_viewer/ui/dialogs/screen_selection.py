@@ -1,26 +1,22 @@
 """
-    Arcane - A secure remote desktop application for Windows with the
-    particularity of having a server entirely written in PowerShell and
-    a cross-platform client (Python/QT6).
-
     Author: Jean-Pierre LESUEUR (@DarkCoderSc)
     License: Apache License 2.0
-    https://github.com/PhrozenIO
-    https://github.com/DarkCoderSc
-    https://twitter.com/DarkCoderSc
-    www.phrozen.io
+    More information about the LICENSE on the LICENSE file in the root directory of the project.
 """
+
+from typing import List, Optional, Union
 
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (QComboBox, QDialog, QHBoxLayout, QLabel,
-                             QPushButton, QVBoxLayout)
+                             QMainWindow, QPushButton, QVBoxLayout)
 
+import arcane_viewer.arcane as arcane
 import arcane_viewer.ui.utilities as utilities
 
 
-class ScreenSelectionWindow(QDialog, utilities.CenterWindow):
+class ScreenSelectionDialog(utilities.QCenteredDialog):
     """ Screen Selection Dialog """
-    def __init__(self, parent, screens):
+    def __init__(self, parent: Optional[Union[QDialog, QMainWindow]], screens: List[arcane.Screen]) -> None:
         super().__init__(parent)
 
         self.screens = screens
@@ -70,10 +66,6 @@ class ScreenSelectionWindow(QDialog, utilities.CenterWindow):
 
         self.setFixedSize(290, self.sizeHint().height())
 
-    def showEvent(self, event):
-        super().showEvent(event)
-        self.center_on_owner(self.parent())
-
-    def get_selected_screen(self):
+    def get_selected_screen(self) -> arcane.Screen:
         """ Get the user-choice selected screen """
         return [screen for screen in self.screens if screen.name == self.screen_selection_combobox.currentData()][0]

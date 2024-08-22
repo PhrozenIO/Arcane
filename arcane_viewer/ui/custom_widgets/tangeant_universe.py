@@ -1,14 +1,7 @@
 """
-    Arcane - A secure remote desktop application for Windows with the
-    particularity of having a server entirely written in PowerShell and
-    a cross-platform client (Python/QT6).
-
     Author: Jean-Pierre LESUEUR (@DarkCoderSc)
     License: Apache License 2.0
-    https://github.com/PhrozenIO
-    https://github.com/DarkCoderSc
-    https://twitter.com/DarkCoderSc
-    www.phrozen.io
+    More information about the LICENSE on the LICENSE file in the root directory of the project.
 
     Todo:
         - (0001) : Find a way to correctly handle the Meta key from Viewer to Server especially from MacOs systems.
@@ -19,12 +12,14 @@
 
 import logging
 from sys import platform
+from typing import Optional, Tuple, Union
 
 from PyQt6.QtCore import Qt, pyqtSlot
-from PyQt6.QtGui import QClipboard
+from PyQt6.QtGui import QClipboard, QKeyEvent, QMouseEvent, QWheelEvent
 from PyQt6.QtWidgets import QApplication, QGraphicsScene, QGraphicsView
 
 import arcane_viewer.arcane as arcane
+import arcane_viewer.arcane.threads as arcane_threads
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +30,7 @@ class TangentUniverse(QGraphicsView):
     diverging veil? When the cosmic mirror distorts, do you walk the ordained spiral or the fragmented loop of the
     twilight realm?`"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
@@ -43,47 +38,60 @@ class TangentUniverse(QGraphicsView):
 
         self.setMouseTracking(True)
 
-        self.events_thread = None
-        self.screen = None
+        self.events_thread: Optional[arcane_threads.EventsThread] = None
+        self.desktop_screen: Optional[arcane.Screen] = None
 
-        self.scene = QGraphicsScene()
-        self.setScene(self.scene)
+        # instead of doing a simple ``setScene(QGraphicsScene())``, we will keep a reference to the scene to be updated
+        # and avoid slight overhead when calling `.scene()` method repeatedly.
+        self.desktop_scene = QGraphicsScene()
+        self.setScene(self.desktop_scene)
 
         self.clipboard = QApplication.clipboard()
-        self.clipboard.dataChanged.connect(self.clipboard_data_changed)
+        if self.clipboard is not None:
+            self.clipboard.dataChanged.connect(self.clipboard_data_changed)
 
-    def set_event_thread(self, events_thread):
+    def set_event_thread(self, events_thread: arcane_threads.EventsThread) -> None:
         """ Set the events thread """
         self.events_thread = events_thread
 
         self.events_thread.update_mouse_cursor.connect(self.update_mouse_cursor)
         self.events_thread.update_clipboard.connect(self.update_clipboard)
 
-    def set_screen(self, screen: arcane.Screen):
+    def set_screen(self, screen: arcane.Screen) -> None:
         """ Set the captured screen original information """
-        self.screen = screen
+        self.desktop_screen = screen
 
-    def fix_mouse_position(self, x, y):
+    def fix_mouse_position(self, x: Union[int, float], y: Union[int, float]) -> Tuple[int, int]:
         """ Fix the virtual desktop mouse position to the original screen position """
-        if self.screen is None:
+        x = int(x)
+        y = int(y)
+
+        if self.desktop_screen is None:
             return x, y
 
-        if self.screen.width > self.width():
-            x_ratio = self.screen.width / self.width()
+        if self.desktop_screen.width > self.width():
+            x_ratio = self.desktop_screen.width / self.width()
         else:
-            x_ratio = self.width() / self.screen.width
+            x_ratio = self.width() / self.desktop_screen.width
 
-        if self.screen.height > self.height():
-            y_ratio = self.screen.height / self.height()
+        if self.desktop_screen.height > self.height():
+            y_ratio = self.desktop_screen.height / self.height()
         else:
-            y_ratio = self.height() / self.screen.height
+            y_ratio = self.height() / self.desktop_screen.height
 
         # We must take in account both virtual desktop size and original screen X, Y position.
-        return (self.screen.x + (x * x_ratio),
-                self.screen.y + (y * y_ratio))
+        return (self.desktop_screen.x + (x * x_ratio),
+                self.desktop_screen.y + (y * y_ratio))
 
-    def send_mouse_event(self, x: int, y: int, state: arcane.MouseState, button: arcane.MouseButton):
+    def send_mouse_event(self, x: Union[int, float], y: Union[int, float], state: arcane.MouseState,
+                         button: arcane.MouseButton) -> None:
+        x = int(x)
+        y = int(y)
+
         """ Push mouse event to the events thread """
+        if self.events_thread is None:
+            return
+
         self.events_thread.send_mouse_event(
             x,
             y,
@@ -91,7 +99,7 @@ class TangentUniverse(QGraphicsView):
             button
         )
 
-    def mouse_action_handler(self, event, is_pressed):
+    def mouse_action_handler(self, event: QMouseEvent, is_pressed: bool) -> None:
         """ Handle mouse press and release events """
 
         if self.events_thread is None:
@@ -110,26 +118,35 @@ class TangentUniverse(QGraphicsView):
 
         self.send_mouse_event(x, y, arcane.MouseState.Down if is_pressed else arcane.MouseState.Up, mouse_button)
 
-    def mouse_click(self, event):
+    def mouse_click(self, event: QMouseEvent) -> None:
         """ Simulate mouse click event """
         self.mouse_action_handler(event, True)
         self.mouse_action_handler(event, False)
 
-    def mousePressEvent(self, event):
+    def mousePressEvent(self, event: Optional[QMouseEvent]) -> None:
+        if event is None:
+            return
+
         self.mouse_action_handler(event, True)
 
-    def mouseReleaseEvent(self, event):
+    def mouseReleaseEvent(self, event: Optional[QMouseEvent]) -> None:
+        if event is None:
+            return
+
         self.mouse_action_handler(event, False)
 
-    def mouseDoubleClickEvent(self, event):
+    def mouseDoubleClickEvent(self, event: Optional[QMouseEvent]) -> None:
         """ Override mouseDoubleClickEvent method to simulate a remote double click event
         Do something better than this is possible? (cross-platform) """
+        if event is None:
+            return
+
         self.mouse_click(event)
         self.mouse_click(event)
 
-    def mouseMoveEvent(self, event):
+    def mouseMoveEvent(self, event: Optional[QMouseEvent]) -> None:
         """ Override mouseMoveEvent method to handle mouse move events """
-        if self.events_thread is None:
+        if self.events_thread is None or event is None:
             return
 
         pos = event.position()
@@ -137,17 +154,20 @@ class TangentUniverse(QGraphicsView):
 
         self.send_mouse_event(x, y, arcane.MouseState.Move, arcane.MouseButton.Void)
 
-    def clipboard_data_changed(self):
+    def clipboard_data_changed(self) -> None:
         """ Handle clipboard data changed event """
+        if self.events_thread is None or self.clipboard is None:
+            return
+
         text = self.clipboard.text(QClipboard.Mode.Clipboard)
 
         self.events_thread.send_clipboard_text(
             text
         )
 
-    def keyPressEvent(self, event):
+    def keyPressEvent(self, event: Optional[QKeyEvent]) -> None:
         """ Override keyPressEvent method to handle key press events """
-        if self.events_thread is None:
+        if self.events_thread is None or event is None:
             return
 
         if not event.isInputEvent():
@@ -253,9 +273,9 @@ class TangentUniverse(QGraphicsView):
 
         self.events_thread.send_key_event(key_text)
 
-    def wheelEvent(self, event):
+    def wheelEvent(self, event: Optional[QWheelEvent]) -> None:
         """ Override wheelEvent method to handle mouse wheel events """
-        if self.events_thread is None:
+        if self.events_thread is None or event is None:
             return
 
         delta = event.angleDelta().y()
@@ -263,9 +283,10 @@ class TangentUniverse(QGraphicsView):
         self.events_thread.send_mouse_wheel_event(delta)
 
     @pyqtSlot(Qt.CursorShape)
-    def update_mouse_cursor(self, cursor):
+    def update_mouse_cursor(self, cursor: Qt.CursorShape) -> None:
         self.setCursor(cursor)
 
     @pyqtSlot(str)
-    def update_clipboard(self, text):
-        self.clipboard.setText(text)
+    def update_clipboard(self, text: str) -> None:
+        if self.clipboard is not None:
+            self.clipboard.setText(text)

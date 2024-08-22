@@ -1,14 +1,7 @@
 """
-    Arcane - A secure remote desktop application for Windows with the
-    particularity of having a server entirely written in PowerShell and
-    a cross-platform client (Python/QT6).
-
     Author: Jean-Pierre LESUEUR (@DarkCoderSc)
     License: Apache License 2.0
-    https://github.com/PhrozenIO
-    https://github.com/DarkCoderSc
-    https://twitter.com/DarkCoderSc
-    www.phrozen.io
+    More information about the LICENSE on the LICENSE file in the root directory of the project.
 """
 
 import logging
@@ -27,14 +20,14 @@ class ConnectThread(QThread):
     thread_finished = pyqtSignal(object)
     session_error = pyqtSignal(str)
 
-    def __init__(self, server_address: str, server_port: int, password: str):
+    def __init__(self, server_address: str, server_port: int, password: str) -> None:
         super().__init__()
 
         self.server_address = server_address
         self.server_port = server_port
         self.__password = password
 
-    def run(self):
+    def run(self) -> None:
         session = None
 
         self.thread_started.emit()

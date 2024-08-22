@@ -1,14 +1,7 @@
 """
-    Arcane - A secure remote desktop application for Windows with the
-    particularity of having a server entirely written in PowerShell and
-    a cross-platform client (Python/QT6).
-
     Author: Jean-Pierre LESUEUR (@DarkCoderSc)
     License: Apache License 2.0
-    https://github.com/PhrozenIO
-    https://github.com/DarkCoderSc
-    https://twitter.com/DarkCoderSc
-    www.phrozen.io
+    More information about the LICENSE on the LICENSE file in the root directory of the project.
 
     Todo:
         - (0001) LogonUI Support
@@ -16,7 +9,8 @@
 
 import logging
 import struct
-from typing import List  # To support python <= 3.8
+from typing import List  # To support python <= 3.8, we need to use `List`
+from typing import Optional
 
 from PyQt6.QtCore import QByteArray, QEventLoop, pyqtSignal, pyqtSlot
 from PyQt6.QtGui import QImage
@@ -34,15 +28,18 @@ class VirtualDesktopThread(ClientBaseThread):
     request_screen_selection = pyqtSignal(list)
     chunk_received = pyqtSignal(QImage, int, int)
 
-    def __init__(self, session: arcane.Session):
+    def __init__(self, session: arcane.Session) -> None:
         super().__init__(session, arcane.WorkerKind.Desktop)
 
-        self.selected_screen = None
-        self.event_loop = None
+        self.selected_screen: Optional[arcane.Screen] = None
+        self.event_loop: Optional[QEventLoop] = None
 
     """`Destruction is a form of creation. So the fact they burn the money is ironic. They just want to see what happens
      when they tear the world apart. They want to change things.`, Donnie Darko"""
-    def client_execute(self):
+    def client_execute(self) -> None:
+        if self.client is None:
+            return
+
         screens_obj = self.client.read_json()
         screens = [arcane.Screen(screen) for screen in screens_obj["List"]]
         logger.info(f"{len(screens)} screen(s) detected")
@@ -51,6 +48,9 @@ class VirtualDesktopThread(ClientBaseThread):
             self.selected_screen = screens[0]
         else:
             self.display_screen_selection_dialog(screens)
+
+        if self.selected_screen is None:
+            return
 
         logger.info(f"Screen: {self.selected_screen.name} "
                     f"({self.selected_screen.width}x{self.selected_screen.height})")
@@ -74,7 +74,10 @@ class VirtualDesktopThread(ClientBaseThread):
 
         packet_max_size = self.session.option_packet_size.value
         while self._running:
-            chunk_size, x, y = struct.unpack('III', self.client.conn.read(12))
+            try:
+                chunk_size, x, y = struct.unpack('III', self.client.conn.read(12))
+            except (Exception, ):
+                break
 
             chunk_bytes = QByteArray()
             bytes_read = 0
@@ -97,13 +100,13 @@ class VirtualDesktopThread(ClientBaseThread):
                 y,
             )
 
-    def stop(self):
+    def stop(self) -> None:
         super().stop()
 
         if self.event_loop is not None:
             self.event_loop.quit()
 
-    def display_screen_selection_dialog(self, screens: List[arcane.Screen]):
+    def display_screen_selection_dialog(self, screens: List[arcane.Screen]) -> None:
         self.event_loop = QEventLoop()
 
         self.request_screen_selection.emit(screens)
@@ -111,9 +114,9 @@ class VirtualDesktopThread(ClientBaseThread):
         self.event_loop.exec()
 
     @pyqtSlot(arcane.Screen)
-    def on_screen_selection_dialog_closed(self, screen: arcane.Screen):
+    def on_screen_selection_dialog_closed(self, screen: arcane.Screen) -> None:
+        self.selected_screen = screen
+
         if self.event_loop is not None:
             self.event_loop.quit()
             self.event_loop = None
-
-        self.selected_screen = screen

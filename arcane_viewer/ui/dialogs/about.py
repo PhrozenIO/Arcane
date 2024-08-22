@@ -1,29 +1,23 @@
 """
-    Arcane - A secure remote desktop application for Windows with the
-    particularity of having a server entirely written in PowerShell and
-    a cross-platform client (Python/QT6).
-
     Author: Jean-Pierre LESUEUR (@DarkCoderSc)
     License: Apache License 2.0
-    https://github.com/PhrozenIO
-    https://github.com/DarkCoderSc
-    https://twitter.com/DarkCoderSc
-    www.phrozen.io
+    More information about the LICENSE on the LICENSE file in the root directory of the project.
 """
 
 import sys
+from typing import Optional, Union
 
 from PyQt6.QtCore import QT_VERSION_STR, QSize, Qt
 from PyQt6.QtGui import QIcon
-from PyQt6.QtWidgets import (QDialog, QHBoxLayout, QLabel, QPushButton,
-                             QVBoxLayout)
+from PyQt6.QtWidgets import (QDialog, QHBoxLayout, QLabel, QMainWindow,
+                             QPushButton, QVBoxLayout)
 
 import arcane_viewer.arcane as arcane
 import arcane_viewer.ui.utilities as utilities
 
 
-class AboutWindow(QDialog, utilities.CenterWindow):
-    def __init__(self, parent):
+class AboutDialog(utilities.QCenteredDialog):
+    def __init__(self, parent: Optional[Union[QDialog, QMainWindow]] = None) -> None:
         super().__init__(parent)
 
         self.setWindowTitle(f"About {arcane.APP_DISPLAY_NAME}")
@@ -74,9 +68,5 @@ class AboutWindow(QDialog, utilities.CenterWindow):
 
         self.adjust_size()
 
-    def adjust_size(self):
+    def adjust_size(self) -> None:
         self.setFixedSize(380, self.sizeHint().height())
-
-    def showEvent(self, event):
-        super().showEvent(event)
-        self.center_on_owner(self.parent())

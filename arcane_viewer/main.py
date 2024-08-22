@@ -19,6 +19,7 @@
 
 import logging
 import sys
+import threading
 
 from PyQt6.QtGui import QColor, QIcon, QPalette
 from PyQt6.QtWidgets import QApplication
@@ -27,8 +28,11 @@ import arcane_viewer.arcane as arcane
 import arcane_viewer.ui.forms as arcane_forms
 
 
-def main():
-    logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+def main() -> None:
+    logging.basicConfig(
+                        level=logging.DEBUG,
+                        format="%(asctime)s - %(name)s[%(thread)d] - %(levelname)s - %(message)s"
+    )
 
     app = QApplication(sys.argv)
 
@@ -94,6 +98,8 @@ def main():
             color: #777777;
         }
         """)
+
+    logging.debug(f"Main thread ID: {threading.get_ident()}")
 
     # Create and show the connect window
     connect_window = arcane_forms.ConnectWindow()

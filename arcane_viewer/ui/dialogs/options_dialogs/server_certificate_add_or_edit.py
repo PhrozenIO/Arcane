@@ -1,29 +1,27 @@
 """
-    Arcane - A secure remote desktop application for Windows with the
-    particularity of having a server entirely written in PowerShell and
-    a cross-platform client (Python/QT6).
-
     Author: Jean-Pierre LESUEUR (@DarkCoderSc)
     License: Apache License 2.0
-    https://github.com/PhrozenIO
-    https://github.com/DarkCoderSc
-    https://twitter.com/DarkCoderSc
-    www.phrozen.io
+    More information about the LICENSE on the LICENSE file in the root directory of the project.
 """
 
 import re
+from typing import Optional, Union
 
 from PyQt6.QtCore import QSettings
 from PyQt6.QtWidgets import (QDialog, QHBoxLayout, QLabel, QLineEdit,
-                             QMessageBox, QPushButton, QSizePolicy,
-                             QSpacerItem, QTextEdit, QVBoxLayout)
+                             QMainWindow, QMessageBox, QPushButton,
+                             QSizePolicy, QSpacerItem, QTextEdit, QVBoxLayout)
 
 import arcane_viewer.arcane as arcane
 import arcane_viewer.ui.utilities as utilities
 
 
-class ServerCertificateAddOrEditDialog(QDialog, utilities.CenterWindow):
-    def __init__(self, parent, settings: QSettings, fingerprint: str = None):
+class ServerCertificateAddOrEditDialog(utilities.QCenteredDialog):
+    def __init__(
+            self,
+            parent: Optional[Union[QDialog, QMainWindow]],
+            settings: QSettings, fingerprint: Optional[str] = None
+    ) -> None:
         super().__init__(parent)
 
         self.settings = settings
@@ -91,7 +89,7 @@ class ServerCertificateAddOrEditDialog(QDialog, utilities.CenterWindow):
 
         self.adjust_size()
 
-    def save_or_update_certificate(self):
+    def save_or_update_certificate(self) -> None:
         """ Save or update the certificate information """
         if self.fingerprint is None:
             fingerprint = self.fingerprint_edit.text().upper()
@@ -108,5 +106,5 @@ class ServerCertificateAddOrEditDialog(QDialog, utilities.CenterWindow):
 
         self.accept()
 
-    def adjust_size(self):
+    def adjust_size(self) -> None:
         self.setFixedSize(400, self.sizeHint().height())

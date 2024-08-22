@@ -1,14 +1,7 @@
 """
-    Arcane - A secure remote desktop application for Windows with the
-    particularity of having a server entirely written in PowerShell and
-    a cross-platform client (Python/QT6).
-
     Author: Jean-Pierre LESUEUR (@DarkCoderSc)
     License: Apache License 2.0
-    https://github.com/PhrozenIO
-    https://github.com/DarkCoderSc
-    https://twitter.com/DarkCoderSc
-    www.phrozen.io
+    More information about the LICENSE on the LICENSE file in the root directory of the project.
 """
 
 import os
@@ -20,19 +13,19 @@ ASSETS_IDENTIFIER = "arcane_viewer.assets"
 if sys.version_info < (3, 9):
     import pkg_resources
 
-    def get_asset_file(asset_name):
+    def get_asset_file(asset_name: str) -> str:
         return pkg_resources.resource_filename(ASSETS_IDENTIFIER, asset_name)
 
 else:
     import importlib.resources as resources
 
-    def get_asset_file(asset_name):
-        with resources.files(ASSETS_IDENTIFIER) / asset_name as asset_path:
-            return str(asset_path)
+    def get_asset_file(asset_name: str) -> str:
+        asset_path = resources.files(ASSETS_IDENTIFIER) / asset_name
+        return str(asset_path)
 
 
 # Application Information
-APP_VERSION = "1.0.4"
+APP_VERSION = "1.0.5"
 APP_NAME = "Arcane"
 APP_ORGANIZATION_NAME = "Phrozen"
 APP_DISPLAY_NAME = f"{APP_NAME} {APP_VERSION} (βeta)"

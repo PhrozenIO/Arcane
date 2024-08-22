@@ -1,14 +1,7 @@
 """
-    Arcane - A secure remote desktop application for Windows with the
-    particularity of having a server entirely written in PowerShell and
-    a cross-platform client (Python/QT6).
-
     Author: Jean-Pierre LESUEUR (@DarkCoderSc)
     License: Apache License 2.0
-    https://github.com/PhrozenIO
-    https://github.com/DarkCoderSc
-    https://twitter.com/DarkCoderSc
-    www.phrozen.io
+    More information about the LICENSE on the LICENSE file in the root directory of the project.
 
     Description:
         Client class that handles secure communication with a remote
@@ -37,16 +30,22 @@ logger = logging.getLogger(__name__)
 
 
 class Client:
-    """ Client class to handle secure communication with remote server """
-    def __init__(self, server_address: str, server_port: int, password: str):
-        logger.info("Connecting to remote server: `{}:{}`...".format(
+    """ Client class to handle secure communication with remote server
+    Things to note:
+        * It is possible to read and write to a socket at the same time, so one thread (for example the main thread) can
+        write to the socket while a secondary thread reads from it (at the same time).
+    """
+    def __init__(self, server_address: str, server_port: int, password: str) -> None:
+        self.id = -1
+
+        self.info("Connecting to remote server: `{}:{}`...".format(
             server_address,
             server_port
         ))
 
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-        logger.debug("Creating and configure new SSL context...")
+        self.debug("Creating and configure new SSL context...")
         self.context = ssl.create_default_context()
         self.context.check_hostname = False
         self.context.verify_mode = ssl.CERT_NONE
@@ -56,7 +55,9 @@ class Client:
             server_hostname=server_address,
         )
 
-        logger.debug("Establishing connection to remote server...")
+        self.id = self.conn.fileno()
+
+        self.debug("Establishing connection to remote server...")
         self.conn.settimeout(10)
 
         self.conn.connect((server_address, server_port))
@@ -68,26 +69,40 @@ class Client:
             )
 
         self.server_fingerprint = hashlib.sha1(server_certificate).hexdigest().upper()
-        logger.debug(f"Server certificate fingerprint: `{self.server_fingerprint}`")
+        self.debug(f"Server certificate fingerprint: `{self.server_fingerprint}`")
 
         self.conn.settimeout(None)
 
-        logger.info(f"[{self.conn.fileno()}] Connected! Authenticating with remote server...")
+        self.info("Connected! Authenticating with remote server...")
 
         self.authenticate(password)
 
-        logger.info("Authentication successful")
+        self.info("Authentication successful")
 
-    def __del__(self):
+    def __del__(self) -> None:
         self.close()
 
-    def read_line(self):
+    def _log(self, level, message: str) -> None:
+        """ Log a message with the client ID as prefix
+        I prefer to use this method instead of directly configuring the logger which I find to be less straightforward.
+        Of course if we would need to reflect the same principle across different classes, we would not use this
+        method. having an id (uuid) prefix is really for debugging purposes and solely for the client class.
+        (Client Tracking: ON; OFF) """
+        logger.log(level, f"[{self.id}] {message}")
+
+    def debug(self, message: str) -> None:
+        self._log(logging.DEBUG, message)
+
+    def info(self, message: str) -> None:
+        self._log(logging.INFO, message)
+
+    def read_line(self) -> str:
         data = b""
 
         while True:
             try:
                 b = self.conn.recv(1)
-            except ssl.SSLError:
+            except (Exception, ):
                 break
 
             if not b:
@@ -99,35 +114,38 @@ class Client:
 
         return data.decode('utf-8').strip()
 
-    def write_line(self, line: str):
-        self.conn.write(line.encode('utf-8') + b'\r\n')
+    def write_line(self, line: str) -> None:
+        try:
+            self.conn.write(line.encode('utf-8') + b'\r\n')
+        except (Exception, ):
+            pass
 
-    def read_json(self):
+    def read_json(self) -> dict:
         try:
             return json.loads(self.read_line())
         except json.JSONDecodeError:
-            return None
+            return {}
 
-    def write_json(self, data: dict):
+    def write_json(self, data: dict) -> None:
         self.write_line(json.dumps(data))
 
-    def authenticate(self, password: str):
-        logger.debug("Request challenge...")
+    def authenticate(self, password: str) -> None:
+        self.debug("Request challenge...")
 
         challenge = self.read_line()
 
-        logger.debug(f"Received challenge: `{challenge}`, attempt to solve it with defined password...")
+        self.debug(f"Received challenge: `{challenge}`, attempt to solve it with defined password...")
 
-        challenge_solution = hashlib.pbkdf2_hmac(
+        challenge_solution_as_bytes = hashlib.pbkdf2_hmac(
             "sha512",
             password.encode("utf-8"),
             challenge.encode("utf-8"),
             1000
         )
-        challenge_solution = binascii.hexlify(challenge_solution)\
+        challenge_solution = binascii.hexlify(challenge_solution_as_bytes)\
             .decode("utf-8").upper()
 
-        logger.debug(f"Challenge solved: `{challenge_solution}`, sending solution to server...")
+        self.debug(f"Challenge solved: `{challenge_solution}`, sending solution to server...")
 
         self.write_line(challenge_solution)
 
@@ -137,17 +155,18 @@ class Client:
                 arcane.ArcaneProtocolError.AuthenticationFailed
             )
 
-    def close(self):
-        if self.client is not None:
-            logger.info(f"[{self.conn.fileno()}] Closing connection...")
+    def close(self) -> None:
+        self.info("Closing connection...")
+        if self.conn is not None:
             try:
-                if self.conn is not None:
-                    self.conn.shutdown(socket.SHUT_RDWR)
-                    self.conn.close()
+                self.conn.shutdown(socket.SHUT_RDWR)
+                self.conn.close()
             except OSError:
-                self.client.close()
-
                 pass
-            finally:
-                self.conn = None
-                self.client = None
+
+        if self.client is not None:
+            try:
+                self.client.close()
+            except OSError:
+                # Should not happen (very unlikely but not null)
+                pass
