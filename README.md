@@ -39,14 +39,32 @@ The project was renamed to Arcane to avoid the generic nature of the previous na
 
 ## Version Table
 
+> ⓘ You can use any version of the viewer with any version of the server, as long as the protocol version matches. The protocol version ensures compatibility between the viewer and the server.
+
+> ⓘ It is recommended to always use the latest versions of both the viewer and the server whenever possible. This ensures compatibility between the two and provides the best experience.
+ 
+### Arcane Viewer Table
+
+| Version         | Protocol Version | Release Date   |
+|-----------------|------------------|----------------|
+| 1.0.0b1 (Beta)  | 5.0.0b1          | 01 August 2024 |
+| 1.0.0b2 (Beta)  | 5.0.0b1          | 05 August 2024 |
+| 1.0.3 (Beta)    | 5.0.0b1          | 12 August 2024 |
+| 1.0.4 (Beta)    | 5.0.1            | 15 August 2024 |
+| 🟢 1.0.5 (Beta) | 5.0.1            | 22 August 2024 |
+
+### Arcane Server Table
+
 | Version        | Protocol Version | Release Date   |
 |----------------|------------------|----------------|
 | 1.0.0b1 (Beta) | 5.0.0b1          | 01 August 2024 |
 | 1.0.0b2 (Beta) | 5.0.0b1          | 05 August 2024 |
-| 1.0.3 (Beta)   | 5.0.0b1          | 12 August 2024 |
-| 1.0.4 (Beta)   | 5.0.1            | 15 August 2024 |
+| 1.0.3          | 5.0.0b1          | 12 August 2024 |
+| 🟢 1.0.4       | 5.0.1            | 15 August 2024 |
 
-> You can use any version of the viewer with any version of the server, as long as the protocol version matches. The protocol version ensures compatibility between the viewer and the server.
+* 🟢 Head version
+
+> ⓘ Since version 1.0.4, the server version will only be updated when there are changes to the server code. It will no longer automatically reflect the latest viewer version as it did before.
 
 ## Components
 
@@ -202,6 +220,10 @@ You can then pass the output base64 certificate file to parameter `EncodedCertif
 </p>
 
 <p align="center">
+    <img width="50%" src="https://raw.githubusercontent.com/PhrozenIO/Arcane/main/resources/images/screenshots/virtual_desktop.png" alt="Server Fingerprint Validation"/>
+</p>
+
+<p align="center">
     <img width="50%" src="https://raw.githubusercontent.com/PhrozenIO/Arcane/main/resources/images/screenshots/options_rd.png" alt="Remote Desktop Options"/>
 </p>
 
@@ -210,6 +232,10 @@ You can then pass the output base64 certificate file to parameter `EncodedCertif
 </p>
 
 ## Change Log
+
+### Version 1.0.5 (Beta)
+
+This release focuses on improving the code structure through extensive refactoring and resolving infrequent bugs caused by previously unhandled edge cases. Type hinting has been fully implemented, and the code is now nearly ready for production deployment.
 
 ### Version 1.0.4 (Beta)
 
@@ -232,6 +258,8 @@ You can then pass the output base64 certificate file to parameter `EncodedCertif
 
 ---
 
-I’m dedicating this project to the amazing HackTheBox France Meetup community! 🇫🇷
-
 ![HackTheBox Meetup France](https://raw.githubusercontent.com/PhrozenIO/Arcane/main/resources/images/htb_france.png)
+
+<p align="center">
+    I’m dedicating this project to the amazing HackTheBox France Meetup community! 🇫🇷
+</p>
