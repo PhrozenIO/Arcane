@@ -9,7 +9,8 @@
 
 import logging
 import struct
-from typing import List  # To support python <= 3.8
+from typing import List  # To support python <= 3.8, we need to use `List`
+from typing import Optional
 
 from PyQt6.QtCore import QByteArray, QEventLoop, pyqtSignal, pyqtSlot
 from PyQt6.QtGui import QImage
@@ -30,8 +31,8 @@ class VirtualDesktopThread(ClientBaseThread):
     def __init__(self, session: arcane.Session) -> None:
         super().__init__(session, arcane.WorkerKind.Desktop)
 
-        self.selected_screen = None
-        self.event_loop = None
+        self.selected_screen: Optional[arcane.Screen] = None
+        self.event_loop: Optional[QEventLoop] = None
 
     """`Destruction is a form of creation. So the fact they burn the money is ironic. They just want to see what happens
      when they tear the world apart. They want to change things.`, Donnie Darko"""
@@ -75,7 +76,7 @@ class VirtualDesktopThread(ClientBaseThread):
         while self._running:
             try:
                 chunk_size, x, y = struct.unpack('III', self.client.conn.read(12))
-            except struct.error:
+            except (Exception, ):
                 break
 
             chunk_bytes = QByteArray()

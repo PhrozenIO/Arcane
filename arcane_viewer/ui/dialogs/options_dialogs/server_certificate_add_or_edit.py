@@ -17,8 +17,11 @@ import arcane_viewer.ui.utilities as utilities
 
 
 class ServerCertificateAddOrEditDialog(utilities.QCenteredDialog):
-    def __init__(self, parent: Optional[Union[QDialog, QMainWindow]], settings: QSettings, fingerprint: str = None)\
-            -> None:
+    def __init__(
+            self,
+            parent: Optional[Union[QDialog, QMainWindow]],
+            settings: QSettings, fingerprint: Optional[str] = None
+    ) -> None:
         super().__init__(parent)
 
         self.settings = settings

@@ -102,7 +102,7 @@ class Client:
         while True:
             try:
                 b = self.conn.recv(1)
-            except (ssl.SSLError, OSError):
+            except (Exception, ):
                 break
 
             if not b:
@@ -117,7 +117,7 @@ class Client:
     def write_line(self, line: str) -> None:
         try:
             self.conn.write(line.encode('utf-8') + b'\r\n')
-        except (ssl.SSLError, OSError):
+        except (Exception, ):
             pass
 
     def read_json(self) -> dict:

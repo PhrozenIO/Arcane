@@ -9,6 +9,7 @@
 """
 
 import logging
+import time
 from typing import List, Optional, Union
 
 from PyQt6.QtCore import QRect, QSize, Qt, pyqtSlot
@@ -56,6 +57,12 @@ class DesktopWindow(QMainWindow):
         self.tangent_universe = arcane_widgets.TangentUniverse()
         self.setCentralWidget(self.tangent_universe)
 
+        """
+        # FPS Counter (Debugging)
+        self.FPS_counter = 0
+        self.FPS_Elapsed = time.time()
+        """
+
         self.start_desktop_thread()
 
     def thread_finished(self, on_error: bool) -> None:
@@ -96,7 +103,7 @@ class DesktopWindow(QMainWindow):
                 self.events_thread.stop()
                 self.events_thread.wait()
 
-    def showEvent(self, event: QShowEvent) -> None:
+    def showEvent(self, event: Optional[QShowEvent]) -> None:
         super().showEvent(event)
 
         if self.connect_window is not None:
@@ -121,7 +128,7 @@ class DesktopWindow(QMainWindow):
         self.v_desktop.fill(Qt.GlobalColor.black)
 
         self.scene_pixmap = QGraphicsPixmapItem(self.v_desktop)
-        self.tangent_universe.scene.addItem(self.scene_pixmap)
+        self.tangent_universe.desktop_scene.addItem(self.scene_pixmap)
 
         # Initialize the size of virtual desktop window regarding our current monitor screen size
         local_screen: Optional[QScreen] = None
@@ -216,7 +223,17 @@ class DesktopWindow(QMainWindow):
 
         self.fit_scene()
 
-    def resizeEvent(self, event: QResizeEvent) -> None:
+        """
+        # FPS Counter (Debugging)
+        self.FPS_counter += 1
+        elapsed = time.time() - self.FPS_Elapsed
+        if elapsed >= 1.0:
+            logger.debug("FPS: {}".format(self.FPS_counter))
+            self.FPS_counter = 0
+            self.FPS_Elapsed = time.time()
+        """
+
+    def resizeEvent(self, event: Optional[QResizeEvent]) -> None:
         """ Overridden resizeEvent method to fit the scene to the view """
         self.fit_scene()
 

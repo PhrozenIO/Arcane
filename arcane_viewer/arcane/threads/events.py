@@ -5,6 +5,7 @@
 """
 
 import logging
+import ssl
 from json.decoder import JSONDecodeError
 
 from PyQt6.QtCore import Qt, pyqtSignal, pyqtSlot
@@ -25,11 +26,16 @@ class EventsThread(ClientBaseThread):
 
     def client_execute(self) -> None:
         """ Execute the client thread """
+        if self.client is None:
+            return
+
         while self._running:
             try:
                 event = self.client.read_json()
             except JSONDecodeError:
                 continue
+            except (OSError, ssl.SSLError, ssl.SSLEOFError):
+                break
 
             if event is None or "Id" not in event:
                 continue

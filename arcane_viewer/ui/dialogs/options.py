@@ -36,11 +36,12 @@ class RemoteDesktopOptionsTab(QWidget):
         options_layout.setContentsMargins(0, 8, 0, 0)
         core_layout.addLayout(options_layout)
 
+        # Clipboard Sharing Mode
         clipboard_sharing_label = QLabel("Clipboard Sharing:")
 
         self.clipboard_sharing_combobox = QComboBox()
-        for value in arcane.ClipboardMode:
-            self.clipboard_sharing_combobox.addItem(value.name, userData=value)
+        for clipboard_mode in arcane.ClipboardMode:
+            self.clipboard_sharing_combobox.addItem(clipboard_mode.name, userData=clipboard_mode)
 
         options_layout.addWidget(clipboard_sharing_label, 0, 0)
         options_layout.addWidget(self.clipboard_sharing_combobox, 0, 1)
@@ -64,14 +65,14 @@ class RemoteDesktopOptionsTab(QWidget):
         # Packet Size (Optimization)
         packet_size_label = QLabel("Packet Size:")
         self.packet_size_input = QComboBox()
-        for value in arcane.PacketSize:
-            self.packet_size_input.addItem(value.display_name, userData=value)
+        for packet_size in arcane.PacketSize:
+            self.packet_size_input.addItem(packet_size.display_name, userData=packet_size)
 
         # Block Size (Optimization)
         block_size_label = QLabel("Block Size:")
         self.block_size_input = QComboBox()
-        for value in arcane.BlockSize:
-            self.block_size_input.addItem(value.display_name, userData=value)
+        for block_size in arcane.BlockSize:
+            self.block_size_input.addItem(block_size.display_name, userData=block_size)
 
         # Place Inputs in our Grid Layout
         desktop_capture_group_layout.addWidget(image_quality_label, 0, 0)
@@ -395,7 +396,7 @@ class OptionsDialog(utilities.QCenteredDialog):
     def adjust_size(self) -> None:
         self.setFixedSize(420, self.sizeHint().height())
 
-    def showEvent(self, event: QShowEvent) -> None:
+    def showEvent(self, event: Optional[QShowEvent]) -> None:
         super().showEvent(event)
 
         self.load_settings()

@@ -18,7 +18,7 @@ class CenteredWindowMixin(QWidget):
         parent = self.parent()
         screen = self.screen()
 
-        if parent is not None:
+        if parent is not None and isinstance(parent, QWidget):
             owner_geometry = parent.frameGeometry()
         elif screen is not None:
             owner_geometry = screen.availableGeometry()

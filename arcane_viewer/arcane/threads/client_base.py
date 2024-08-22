@@ -5,6 +5,7 @@
 """
 
 import logging
+import traceback
 from abc import abstractmethod
 from typing import Optional
 
@@ -48,6 +49,7 @@ class ClientBaseThread(QThread):
         except Exception as e:
             if self._running:
                 logger.error(f"Thread `{self.__class__.__name__}` encountered an error: `{e}`")
+                traceback.print_exc()
                 on_error = True
         finally:
             self.stop()

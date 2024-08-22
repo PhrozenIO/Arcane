@@ -201,7 +201,7 @@ class ConnectWindow(utilities.QCenteredMainWindow):
         if self.__connecting_dialog is not None and self.__connecting_dialog.isVisible():
             self.__connecting_dialog.close()
 
-        if session is None:
+        if session is None or session.server_fingerprint is None:
             return
 
         self.session = session
