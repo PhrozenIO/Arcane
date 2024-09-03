@@ -7,7 +7,7 @@ long_description = (this_directory / "README.md").read_text()
 
 setup(
     name='arcane_viewer',
-    version='1.0.5',
+    version='1.0.6',
     packages=find_packages(),
     include_package_data=True,
     install_requires=[
@@ -26,7 +26,7 @@ setup(
     license="Apache License 2.0",
     keywords="remote desktop, remote control, remote access, remote administration, remote assistance, powershell",
     url="https://github.com/PhrozenIO/Arcane",
-    python_requires='>=3.6',
+    python_requires='>=3.8',
     long_description=long_description,
     long_description_content_type='text/markdown',
 )
