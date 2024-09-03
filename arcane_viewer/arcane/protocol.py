@@ -6,7 +6,7 @@
 
 from enum import Enum, auto
 
-PROTOCOL_VERSION = '5.0.1'
+PROTOCOL_VERSION = '5.0.2'
 
 
 class WorkerKind(Enum):
