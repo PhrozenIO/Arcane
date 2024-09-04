@@ -61,7 +61,6 @@ class VirtualDesktopThread(ClientBaseThread):
                 "ImageCompressionQuality": self.session.option_image_quality,
                 "PacketSize": self.session.option_packet_size.value,
                 "BlockSize": self.session.option_block_size.value,
-                "LogonUI": False,  # TODO: 0001
             }
         )
 
