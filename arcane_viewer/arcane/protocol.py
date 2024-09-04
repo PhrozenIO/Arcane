@@ -29,8 +29,6 @@ class ArcaneProtocolCommand(Enum):
     BadRequest = 0x5
     ResourceFound = 0x6
     ResourceNotFound = 0x7
-    LogonUIAccessDenied = 0x8
-    LogonUIWrongSession = 0x9
 
 
 class OutputEvent(Enum):
