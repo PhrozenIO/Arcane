@@ -50,6 +50,10 @@ class TangentUniverse(QGraphicsView):
         if self.clipboard is not None:
             self.clipboard.dataChanged.connect(self.clipboard_data_changed)
 
+    def reset_scene(self) -> None:
+        if self.desktop_scene is not None:
+            self.desktop_scene.clear()
+
     def set_event_thread(self, events_thread: arcane_threads.EventsThread) -> None:
         """ Set the events thread """
         self.events_thread = events_thread

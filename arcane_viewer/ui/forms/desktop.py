@@ -8,10 +8,12 @@
                    selected screen object and reflect the changes where necessary.
 """
 
+import copy
 import logging
+import time
 from typing import List, Optional, Union
 
-from PyQt6.QtCore import QRect, QSize, Qt, pyqtSlot
+from PyQt6.QtCore import QRect, QRectF, QSize, Qt, pyqtSlot
 from PyQt6.QtGui import (QCloseEvent, QImage, QPainter, QPixmap, QResizeEvent,
                          QScreen, QShowEvent, QTransform)
 from PyQt6.QtWidgets import (QApplication, QDialog, QGraphicsPixmapItem,
@@ -29,8 +31,10 @@ class DesktopWindow(QMainWindow):
     def __init__(self, connect_window: Union[QDialog, QMainWindow], session: arcane.Session) -> None:
         super().__init__()
 
-        self.scene_pixmap: Optional[QGraphicsPixmapItem] = None
-        self.v_desktop: Optional[QPixmap] = None
+        self.show_fps = True
+
+        self.desktop_graphics_pixmap: Optional[QGraphicsPixmapItem] = None
+        self.desktop_pixmap: Optional[QPixmap] = None
 
         self.desktop_thread: Optional[arcane_threads.VirtualDesktopThread] = None
         self.events_thread: Optional[arcane_threads.EventsThread] = None
@@ -42,12 +46,14 @@ class DesktopWindow(QMainWindow):
         self.connect_window = connect_window
 
         # Set Window Properties, Layout, Title, Icon and Size
-        self.setWindowTitle("🖥 {} ({}) :: {} {}".format(
+        self.window_title = "🖥 {} ({}) :: {} {}".format(
             arcane.APP_DISPLAY_NAME,
             session.server_address,
             session.display_name,
             "- View Only" if session.presentation else ""
-        ))
+        )
+        self.setWindowTitle(self.window_title)
+
         self.resize(QSize(640, 360))
         self.setMouseTracking(True)
 
@@ -56,13 +62,20 @@ class DesktopWindow(QMainWindow):
         self.tangent_universe = arcane_widgets.TangentUniverse()
         self.setCentralWidget(self.tangent_universe)
 
-        """
         # FPS Counter (Debugging)
-        self.FPS_counter = 0
-        self.FPS_Elapsed = time.time()
-        """
+        if self.show_fps:
+            self.FPS_counter = 0
+            self.FPS_Elapsed = time.time()
 
         self.start_desktop_thread()
+
+    def update_fps(self):
+        self.FPS_counter += 1
+        elapsed = time.time() - self.FPS_Elapsed
+        if elapsed >= 1.0:
+            self.setWindowTitle(f"{self.window_title} - FPS: {self.FPS_counter}")
+            self.FPS_counter = 0
+            self.FPS_Elapsed = time.time()
 
     def thread_finished(self, on_error: bool) -> None:
         """ Handle the thread finished event """
@@ -72,35 +85,57 @@ class DesktopWindow(QMainWindow):
         self.close()
 
     def start_desktop_thread(self) -> None:
-        """ Start the desktop thread to handle remote desktop streaming """
+        """ Desktop thread is responsible for rendering the remote desktop in the virtual desktop window
+            (Tangent Universe) """
+        self.stop_desktop_thread()
+
         self.desktop_thread = arcane_threads.VirtualDesktopThread(self.session)
-        self.desktop_thread.chunk_received.connect(self.update_scene)
+        self.desktop_thread.received_dirty_rect_signal.connect(self.update_scene)
         self.desktop_thread.open_cellar_door.connect(self.open_cellar_door)
         self.desktop_thread.thread_finished.connect(self.thread_finished)
-        self.desktop_thread.request_screen_selection.connect(self.display_screen_selection_dialog)
+        self.desktop_thread.request_screen_selection_dialog_signal.connect(self.display_screen_selection_dialog)
+        self.desktop_thread.start_events_worker_signal.connect(self.start_events_thread)
         self.desktop_thread.start()
 
-    def start_events_thread(self, screen: arcane.Screen) -> None:
-        """ Start the events thread to handle remote desktop events """
+    def stop_desktop_thread(self) -> None:
+        if self.desktop_thread is None:
+            return
+
+        if self.desktop_thread.isRunning():
+            self.desktop_thread.stop()
+            self.desktop_thread.wait()
+
+        self.desktop_thread = None
+
+    def start_events_thread(self) -> None:
+        """ Events thread is responsible for two things:
+                1) Handling incoming events in thread loop (Socket Read)
+                2) Exposing methods to let Tangent Universe component to send events to the server
+                   (E.g. Keyboard and Mouse) (Socket Write) """
+        self.stop_events_thread()
+
         self.events_thread = arcane_threads.EventsThread(self.session)
         self.events_thread.thread_finished.connect(self.thread_finished)
         self.events_thread.start()
 
         # Assign our events thread to the Tangent Universe
         self.tangent_universe.set_event_thread(self.events_thread)
-        self.tangent_universe.set_screen(screen)
+
+    def stop_events_thread(self) -> None:
+        if self.events_thread is None:
+            return
+
+        if self.events_thread.isRunning():
+            self.events_thread.stop()
+            self.events_thread.wait()
+
+        self.events_thread = None
 
     def close_cellar_door(self) -> None:
         """ Collapse Tangent Universe to Main Branch, We were able to save the world before 28:06:42:12 """
-        if self.desktop_thread is not None:
-            if self.desktop_thread.isRunning():
-                self.desktop_thread.stop()
-                self.desktop_thread.wait()
+        self.stop_desktop_thread()
 
-        if self.events_thread is not None:
-            if self.events_thread.isRunning():
-                self.events_thread.stop()
-                self.events_thread.wait()
+        self.stop_events_thread()
 
     def showEvent(self, event: Optional[QShowEvent]) -> None:
         super().showEvent(event)
@@ -123,11 +158,17 @@ class DesktopWindow(QMainWindow):
 
     def open_cellar_door(self, screen: arcane.Screen) -> None:
         """ Initialize the virtual desktop (Tangent Universe) """
-        self.v_desktop = QPixmap(screen.size())
-        self.v_desktop.fill(Qt.GlobalColor.black)
+        screen = copy.deepcopy(screen)  # Create an independent copy of the screen object
 
-        self.scene_pixmap = QGraphicsPixmapItem(self.v_desktop)
-        self.tangent_universe.desktop_scene.addItem(self.scene_pixmap)
+        self.tangent_universe.reset_scene()
+
+        self.desktop_pixmap = QPixmap(screen.size())
+        self.desktop_pixmap.fill(Qt.GlobalColor.black)
+
+        self.desktop_graphics_pixmap = QGraphicsPixmapItem(self.desktop_pixmap)
+
+        self.tangent_universe.desktop_scene.addItem(self.desktop_graphics_pixmap)
+        self.tangent_universe.set_screen(screen)
 
         # Initialize the size of virtual desktop window regarding our current monitor screen size
         local_screen: Optional[QScreen] = None
@@ -176,65 +217,65 @@ class DesktopWindow(QMainWindow):
             new_height
         )
 
-        # We can now start our events thread
-        # TODO: 0001
-        self.start_events_thread(screen)
-
     def fit_scene(self) -> None:
         """ Fit the scene (Hacky Technique) to the view """
         if (
                 self.tangent_universe is None or
-                self.scene_pixmap is None or
-                self.v_desktop is None
+                self.desktop_graphics_pixmap is None or
+                self.desktop_pixmap is None
         ):
             return
 
         # Instead of bellow code:
-        #   `self.view.fitInView(self.scene_pixmap, Qt.AspectRatioMode.IgnoreAspectRatio)`
+        #   `self.view.fitInView(self.desktop_graphics_pixmap, Qt.AspectRatioMode.IgnoreAspectRatio)`
         # We will calculate the scale factor manually to avoid the aspect ratio issue and fitting correctly the view to
         # our virtual desktop host window.
         view_rect = self.tangent_universe.frameRect()
 
-        scale_x = view_rect.width() / self.v_desktop.width()
-        scale_y = view_rect.height() / self.v_desktop.height()
+        scale_x = view_rect.width() / self.desktop_pixmap.width()
+        scale_y = view_rect.height() / self.desktop_pixmap.height()
 
         transform = QTransform()
         transform.scale(scale_x, scale_y)
         self.tangent_universe.setTransform(transform, False)
 
+        self.tangent_universe.setSceneRect(
+            0,
+            0,
+            self.desktop_pixmap.width(),
+            self.desktop_pixmap.height(),
+        )
+
     def update_scene(self, chunk: QImage, x: int, y: int) -> None:
         """ Update the virtual desktop with the received chunk """
-        if self.v_desktop is None or self.scene_pixmap is None:
+        if self.desktop_pixmap is None or self.desktop_graphics_pixmap is None:
             return
 
         if chunk is None or not isinstance(chunk, QImage):
             return
 
         # Update the virtual desktop with the received chunk (Tangent Universe)
-        rect = QRect(x, y, chunk.width(), chunk.height())
+        dirty_rect = QRect(x, y, chunk.width(), chunk.height())
 
-        painter = QPainter(self.v_desktop)
-        painter.drawImage(rect, chunk)
+        painter = QPainter(self.desktop_pixmap)
+        painter.setClipRect(dirty_rect)
+        painter.drawImage(dirty_rect, chunk)
         painter.end()
 
         # Update the scene with the updated virtual desktop
-        self.scene_pixmap.setPixmap(self.v_desktop)
+        self.desktop_graphics_pixmap.setPixmap(self.desktop_pixmap)
+        self.desktop_graphics_pixmap.update(QRectF(dirty_rect))
 
         self.fit_scene()
 
-        """
         # FPS Counter (Debugging)
-        self.FPS_counter += 1
-        elapsed = time.time() - self.FPS_Elapsed
-        if elapsed >= 1.0:
-            logger.debug("FPS: {}".format(self.FPS_counter))
-            self.FPS_counter = 0
-            self.FPS_Elapsed = time.time()
-        """
+        if self.show_fps:
+            self.update_fps()
 
     def resizeEvent(self, event: Optional[QResizeEvent]) -> None:
         """ Overridden resizeEvent method to fit the scene to the view """
         self.fit_scene()
+        super().resizeEvent(event)
 
     def screen_selection_rejected(self) -> None:
         self.close()
