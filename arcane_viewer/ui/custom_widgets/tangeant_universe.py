@@ -4,14 +4,12 @@
     More information about the LICENSE on the LICENSE file in the root directory of the project.
 
     Todo:
-        - (0001) : Find a way to correctly handle the Meta key from Viewer to Server especially from MacOs systems.
         - (0002) : Implement a way to handle additional special characters that are not correctly interpreted by QT.
         - (0003) : Handle shortcuts (CTRL+, WIN+, ALT+ etc..).
         - (0004) : Investigate for a generic way to handle special characters for all keyboard layouts, not just AZERTY.
 """
 
 import logging
-from sys import platform
 from typing import Optional, Tuple, Union
 
 from PyQt6.QtCore import Qt, pyqtSlot
@@ -232,11 +230,11 @@ class TangentUniverse(QGraphicsView):
         elif event.key() == Qt.Key.Key_Tab:
             key_text = "{TAB}"
         elif event.key() == Qt.Key.Key_Control:
-            key_text = "{CTRL}"
+            key_text = "^"
         elif event.key() == Qt.Key.Key_Alt:
-            key_text = "{ALT}"
+            key_text = "%"
         elif event.key() == Qt.Key.Key_Shift:
-            key_text = "{SHIFT}"
+            key_text = "+"
         elif event.key() == Qt.Key.Key_Escape:
             key_text = "{ESC}"
         elif event.key() == Qt.Key.Key_CapsLock:
@@ -259,9 +257,7 @@ class TangentUniverse(QGraphicsView):
             key_text = "{PRTSC}"
         elif event.key() == Qt.Key.Key_ScrollLock:
             key_text = "{SCROLLLOCK}"
-
-        # TODO: 0001
-        elif event.key() == Qt.Key.Key_Meta and platform != "darwin":
+        elif event.key() == Qt.Key.Key_Meta:
             key_text = "^{ESC}"
 
         # TODO: 0004

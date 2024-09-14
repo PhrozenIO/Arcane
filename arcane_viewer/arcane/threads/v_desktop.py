@@ -2,9 +2,6 @@
     Author: Jean-Pierre LESUEUR (@DarkCoderSc)
     License: Apache License 2.0
     More information about the LICENSE on the LICENSE file in the root directory of the project.
-
-    Todo:
-        - (0001) LogonUI Support
 """
 
 import logging

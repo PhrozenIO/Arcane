@@ -111,7 +111,13 @@ class DesktopWindow(QMainWindow):
         """ Events thread is responsible for two things:
                 1) Handling incoming events in thread loop (Socket Read)
                 2) Exposing methods to let Tangent Universe component to send events to the server
-                   (E.g. Keyboard and Mouse) (Socket Write) """
+                   (E.g. Keyboard and Mouse) (Socket Write)
+
+            We do not create the events thread if we are in presentation mode. Server won't do it either."""
+
+        if self.session is None or self.session.presentation:
+            return
+
         self.stop_events_thread()
 
         self.events_thread = arcane_threads.EventsThread(self.session)
