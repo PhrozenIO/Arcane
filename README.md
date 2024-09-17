@@ -10,9 +10,7 @@ The client/viewer is a cross-platform application developed in Python, using the
 
 The project was renamed to Arcane to avoid the generic nature of the previous name and to signify a major step in the project's development: the complete rewrite of the viewer to be cross-platform.
 
-[![Demo Video](https://raw.githubusercontent.com/PhrozenIO/Arcane/main/resources/images/video.png)](https://www.youtube.com/watch?v=h6xePrsIcQY)
-
-> Arcane is currently in beta and is not recommended for production environments. 
+[![Demo Video](https://raw.githubusercontent.com/PhrozenIO/Arcane/main/resources/images/video.png)](https://www.youtube.com/watch?v=TgklYPXEptY)
 
 ## Key Features
 
@@ -27,6 +25,8 @@ The project was renamed to Arcane to avoid the generic nature of the previous na
 * **Session Concurrency**: Multiple viewers can connect to a single server at the same time, allowing multiple users to collaborate on the same remote desktop.
 * **Sleep Mode Prevention**: To ensure that the remote desktop remains active and responsive, the module prevents the remote computer from entering sleep mode while it is waiting for viewers to connect.
 * **Streaming Optimization**: To improve the streaming speed, the module only sends updated pieces of the desktop to the viewer, reducing the amount of data transmitted over the network.
+* **Secure Desktop / LogonUI Integration**: When Arcane Server is run as an interactive SYSTEM process, it can access Secure Desktop features, such as Logon UI or UAC prompts, without relying on external processes or tools. Everything is handled within a single Arcane Server instance. Please note that exposing an interactive SYSTEM process can pose security risks; use this feature only if you understand the implications.
+* **Dynamic Display Settings Update:** Arcane Server detects changes in display resolution or HDPI settings and keeps the Viewer updated with these adjustments.
 
 ## Coming Soon
 
@@ -71,9 +71,10 @@ For detailed instructions on how to use and configure the Arcane Server, please 
 
 ## Version Table
 
-| Version | Protocol Version | Release Date   | Compatible Servers |
-|---------|------------------|----------------|--------------------|
-| 1.0.5b  | 5.0.1            | 22 August 2024 | [1.0.4](https://github.com/PhrozenIO/ArcaneServer/releases/tag/1-0-4) |
+| Version | Protocol Version | Release Date      | Compatible Servers |
+|---------|------------------|-------------------|--------------------|
+| 1.0.5b  | 5.0.1            | 22 August 2024    | [1.0.4](https://github.com/PhrozenIO/ArcaneServer/releases/tag/1-0-4) |
+| 1.0.6   | 5.0.2            | 17 September 2024 | |
 
 > ⓘ You can use any version of the viewer with any version of the server, as long as the protocol version matches. The protocol version ensures compatibility between the viewer and the server.
 
@@ -103,6 +104,10 @@ For detailed instructions on how to use and configure the Arcane Server, please 
 
 ## Change Log
 
+### Version 1.0.6
+
+- [x] **Arcane Protocol Update:** The protocol has been upgraded to version 5.0.2, bringing support for several server improvements, including dynamic display resolution updates, HDPI settings changes, and Secure Desktop support for Remote Desktop Streaming and Input (Mouse, Keyboard, Clipboard).]
+
 ### Version 1.0.5 (Beta)
 
 This release focuses on improving the code structure through extensive refactoring and resolving infrequent bugs caused by previously unhandled edge cases. Type hinting has been fully implemented, and the code is now nearly ready for production deployment.
@@ -115,7 +120,7 @@ This release focuses on improving the code structure through extensive refactori
 ### Version 1.0.3 (Beta)
 
 - [x] The connection window interface has been streamlined, with additional options now accessible in a dedicated settings window.
-- [x] Server certificate validation has been introduced. When connecting to a server for the first time, users will be prompted to trust the certificate and can choose to remember their decision.
+- [x] Server certificate validation has been introduced. When co- nnecting to a server for the first time, users will be prompted to trust the certificate and can choose to remember their decision.
 - [x] A new settings window has been implemented, offering support for additional remote desktop parameters and managing trusted server certificates, including options to add, edit, and remove certificates.
 - [x] Various code refactoring and structural improvements have been made to enhance the overall performance and maintainability of the application.
 
@@ -125,6 +130,16 @@ This release focuses on improving the code structure through extensive refactori
 - [x] The Arcane Viewer Virtual Desktop Window now has an icon on the taskbar.
 - [x] HDPI and scaling support have been improved.
 - [x] Arcane Viewer Virtual Desktop Window placement has been improved.
+
+## Special Thanks
+
+* [Mudpak (Mudsor MASOOD)](https://www.linkedin.com/in/mudsormasood/) - Official Beta / Quality Tester
+
+Additionally, I extend my gratitude to those who contributed to enhancing the project's visibility:
+
+* [Laurent Minne](https://www.linkedin.com/in/laurent-minne/)
+
+*If you share Arcane with your community, please feel free to contact me to be recognized in this section. I am very grateful to those who contribute by sharing my research and projects.*
 
 ---
 

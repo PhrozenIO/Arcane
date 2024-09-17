@@ -4,14 +4,11 @@
     More information about the LICENSE on the LICENSE file in the root directory of the project.
 
     Todo:
-        - (0001) : Find a way to correctly handle the Meta key from Viewer to Server especially from MacOs systems.
-        - (0002) : Implement a way to handle additional special characters that are not correctly interpreted by QT.
-        - (0003) : Handle shortcuts (CTRL+, WIN+, ALT+ etc..).
-        - (0004) : Investigate for a generic way to handle special characters for all keyboard layouts, not just AZERTY.
+        - (0002) : Implement a way to handle additional special characters that are not correctly interpreted by QT
+                    (Examples: ê, ã, `).
 """
 
 import logging
-from sys import platform
 from typing import Optional, Tuple, Union
 
 from PyQt6.QtCore import Qt, pyqtSlot
@@ -49,6 +46,10 @@ class TangentUniverse(QGraphicsView):
         self.clipboard = QApplication.clipboard()
         if self.clipboard is not None:
             self.clipboard.dataChanged.connect(self.clipboard_data_changed)
+
+    def reset_scene(self) -> None:
+        if self.desktop_scene is not None:
+            self.desktop_scene.clear()
 
     def set_event_thread(self, events_thread: arcane_threads.EventsThread) -> None:
         """ Set the events thread """
@@ -165,48 +166,81 @@ class TangentUniverse(QGraphicsView):
             text
         )
 
+    @staticmethod
+    def parse_f_keys(event: QKeyEvent) -> Optional[str]:
+        if event.key() == Qt.Key.Key_F1:
+            return "{F1}"
+        elif event.key() == Qt.Key.Key_F2:
+            return "{F2}"
+        elif event.key() == Qt.Key.Key_F3:
+            return "{F3}"
+        elif event.key() == Qt.Key.Key_F4:
+            return "{F4}"
+        elif event.key() == Qt.Key.Key_F5:
+            return "{F5}"
+        elif event.key() == Qt.Key.Key_F6:
+            return "{F6}"
+        elif event.key() == Qt.Key.Key_F7:
+            return "{F7}"
+        elif event.key() == Qt.Key.Key_F8:
+            return "{F8}"
+        elif event.key() == Qt.Key.Key_F9:
+            return "{F9}"
+        elif event.key() == Qt.Key.Key_F10:
+            return "{F10}"
+        elif event.key() == Qt.Key.Key_F11:
+            return "{F11}"
+        elif event.key() == Qt.Key.Key_F12:
+            return "{F12}"
+        elif event.key() == Qt.Key.Key_F13:
+            return "{F13}"
+        elif event.key() == Qt.Key.Key_F14:
+            return "{F14}"
+        elif event.key() == Qt.Key.Key_F15:
+            return "{F15}"
+        elif event.key() == Qt.Key.Key_F16:
+            return "{F16}"
+        else:
+            return None
+
     def keyPressEvent(self, event: Optional[QKeyEvent]) -> None:
-        """ Override keyPressEvent method to handle key press events """
+        """ Override keyPressEvent method to handle key press events
+            For a maximum of compatibility, we will not yet use match case from Python > 3.10 to handle such big enum"""
         if self.events_thread is None or event is None:
             return
 
         if not event.isInputEvent():
             return
 
-        # For a maximum of compatibility, we will not yet use match case from Python > 3.10 to handle such big enum
-        # F Keys
-        if event.key() == Qt.Key.Key_F1:
-            key_text = "{F1}"
-        elif event.key() == Qt.Key.Key_F2:
-            key_text = "{F2}"
-        elif event.key() == Qt.Key.Key_F3:
-            key_text = "{F3}"
-        elif event.key() == Qt.Key.Key_F4:
-            key_text = "{F4}"
-        elif event.key() == Qt.Key.Key_F5:
-            key_text = "{F5}"
-        elif event.key() == Qt.Key.Key_F6:
-            key_text = "{F6}"
-        elif event.key() == Qt.Key.Key_F7:
-            key_text = "{F7}"
-        elif event.key() == Qt.Key.Key_F8:
-            key_text = "{F8}"
-        elif event.key() == Qt.Key.Key_F9:
-            key_text = "{F9}"
-        elif event.key() == Qt.Key.Key_F10:
-            key_text = "{F10}"
-        elif event.key() == Qt.Key.Key_F11:
-            key_text = "{F11}"
-        elif event.key() == Qt.Key.Key_F12:
-            key_text = "{F12}"
-        elif event.key() == Qt.Key.Key_F13:
-            key_text = "{F13}"
-        elif event.key() == Qt.Key.Key_F14:
-            key_text = "{F14}"
-        elif event.key() == Qt.Key.Key_F15:
-            key_text = "{F15}"
-        elif event.key() == Qt.Key.Key_F16:
-            key_text = "{F16}"
+        key_text: Optional[str] = None
+        is_shortcut = False
+
+        # Handle Ctrl + C, Ctrl + V, Ctrl + X etc.. CTRL + [A-Z]
+        if (Qt.Key.Key_A <= event.key() <= Qt.Key.Key_Z) and \
+                event.modifiers() == Qt.KeyboardModifier.ControlModifier:
+            key_text = "{^}" + event.text().upper()
+            is_shortcut = True
+
+        # Handle [F1-F12] and/or ALT + [F1-F12]
+        elif Qt.Key.Key_F1 <= event.key() <= Qt.Key.Key_F12:
+            key_text = self.parse_f_keys(event)
+
+            if event.modifiers() == Qt.KeyboardModifier.AltModifier and key_text is not None:
+                key_text = "{%}" + key_text
+                is_shortcut = True
+
+        # Handle WIN + L
+        elif (event.key() == Qt.Key.Key_L) and event.modifiers() == Qt.KeyboardModifier.MetaModifier:
+            key_text = "{LOCKWORKSTATION}"
+
+        # Reserved for future use
+        # Handle Ctrl + Alt + Del
+        # elif (event.key() == Qt.Key.Key_Delete and
+        #        event.modifiers() == (
+        #                Qt.KeyboardModifier.ControlModifier |
+        #                Qt.KeyboardModifier.AltModifier
+        #        )):
+        #    key_text = "{CTRL+ALT+DEL}"
 
         # Arrow Keys
         elif event.key() == Qt.Key.Key_Up:
@@ -227,12 +261,6 @@ class TangentUniverse(QGraphicsView):
             key_text = "{BACKSPACE}"
         elif event.key() == Qt.Key.Key_Tab:
             key_text = "{TAB}"
-        elif event.key() == Qt.Key.Key_Control:
-            key_text = "{CTRL}"
-        elif event.key() == Qt.Key.Key_Alt:
-            key_text = "{ALT}"
-        elif event.key() == Qt.Key.Key_Shift:
-            key_text = "{SHIFT}"
         elif event.key() == Qt.Key.Key_Escape:
             key_text = "{ESC}"
         elif event.key() == Qt.Key.Key_CapsLock:
@@ -256,22 +284,25 @@ class TangentUniverse(QGraphicsView):
         elif event.key() == Qt.Key.Key_ScrollLock:
             key_text = "{SCROLLLOCK}"
 
-        # TODO: 0001
-        elif event.key() == Qt.Key.Key_Meta and platform != "darwin":
-            key_text = "^{ESC}"
+        # Modifier Keys
+        elif event.key() == Qt.Key.Key_Meta:
+            key_text = "{!}"
+        elif event.key() == Qt.Key.Key_Control:
+            pass
+        elif event.key() == Qt.Key.Key_Alt:
+            pass
+        elif event.key() == Qt.Key.Key_Shift:
+            pass
 
-        # TODO: 0004
-        # elif event.key() == Qt.Key.Key_Egrave and event.modifiers() & Qt.KeyboardModifier.AltModifier:
-        #    key_text = "{`}"
+        # Special Character to Escape
+        elif event.key() == Qt.Key.Key_BraceLeft:
+            key_text = "{{"
 
         else:
-            # Handle others keys that might not be correctly interpreted by PowerShell
-            if event.text() in ["+", "{", "}", "%", "(", ")"]:
-                key_text = f"{{{event.text()}}}"
-            else:
-                key_text = event.text()
+            key_text = event.text()
 
-        self.events_thread.send_key_event(key_text)
+        if key_text is not None:
+            self.events_thread.send_key_event(key_text, is_shortcut)
 
     def wheelEvent(self, event: Optional[QWheelEvent]) -> None:
         """ Override wheelEvent method to handle mouse wheel events """

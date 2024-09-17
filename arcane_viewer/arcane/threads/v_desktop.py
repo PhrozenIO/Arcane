@@ -2,9 +2,6 @@
     Author: Jean-Pierre LESUEUR (@DarkCoderSc)
     License: Apache License 2.0
     More information about the LICENSE on the LICENSE file in the root directory of the project.
-
-    Todo:
-        - (0001) LogonUI Support
 """
 
 import logging
@@ -25,14 +22,19 @@ logger = logging.getLogger(__name__)
 class VirtualDesktopThread(ClientBaseThread):
     """ Thread to handle remote desktop streaming, at quantum level """
     open_cellar_door = pyqtSignal(arcane.Screen)
-    request_screen_selection = pyqtSignal(list)
-    chunk_received = pyqtSignal(QImage, int, int)
+    request_screen_selection_dialog_signal = pyqtSignal(list)
+    received_dirty_rect_signal = pyqtSignal(QImage, int, int)
+    start_events_worker_signal = pyqtSignal()
 
     def __init__(self, session: arcane.Session) -> None:
         super().__init__(session, arcane.WorkerKind.Desktop)
 
         self.selected_screen: Optional[arcane.Screen] = None
         self.event_loop: Optional[QEventLoop] = None
+
+    def open_or_refresh_cellar_door(self) -> None:
+        if self.selected_screen is not None:
+            self.open_cellar_door.emit(self.selected_screen)
 
     """`Destruction is a form of creation. So the fact they burn the money is ironic. They just want to see what happens
      when they tear the world apart. They want to change things.`, Donnie Darko"""
@@ -61,23 +63,29 @@ class VirtualDesktopThread(ClientBaseThread):
                 "ImageCompressionQuality": self.session.option_image_quality,
                 "PacketSize": self.session.option_packet_size.value,
                 "BlockSize": self.session.option_block_size.value,
-                "LogonUI": False,  # TODO: 0001
             }
         )
 
         """ Open Cellar Door
         `This famous linguist once said, of all the phrases in the English language, of all the endless combinations
         of words in all of history, that 'cellar door' is the most beautiful.`, Karen Pomeroy"""
-        self.open_cellar_door.emit(
-            self.selected_screen
-        )
+        self.open_or_refresh_cellar_door()
+
+        self.start_events_worker_signal.emit()
 
         packet_max_size = self.session.option_packet_size.value
         while self._running:
             try:
-                chunk_size, x, y = struct.unpack('III', self.client.conn.read(12))
+                chunk_size, x, y, screen_updated = struct.unpack('IIIB', self.client.conn.read(13))
             except (Exception, ):
                 break
+
+            if bool(screen_updated):
+                self.selected_screen = arcane.Screen(self.client.read_json())
+
+                self.open_or_refresh_cellar_door()
+
+                continue
 
             chunk_bytes = QByteArray()
             bytes_read = 0
@@ -94,7 +102,7 @@ class VirtualDesktopThread(ClientBaseThread):
             chunk = QImage()
             chunk.loadFromData(chunk_bytes)
 
-            self.chunk_received.emit(
+            self.received_dirty_rect_signal.emit(
                 chunk,
                 x,
                 y,
@@ -109,7 +117,7 @@ class VirtualDesktopThread(ClientBaseThread):
     def display_screen_selection_dialog(self, screens: List[arcane.Screen]) -> None:
         self.event_loop = QEventLoop()
 
-        self.request_screen_selection.emit(screens)
+        self.request_screen_selection_dialog_signal.emit(screens)
 
         self.event_loop.exec()
 
