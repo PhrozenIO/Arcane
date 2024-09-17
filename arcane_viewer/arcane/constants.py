@@ -28,7 +28,7 @@ else:
 APP_VERSION = "1.0.6"
 APP_NAME = "Arcane"
 APP_ORGANIZATION_NAME = "Phrozen"
-APP_DISPLAY_NAME = f"{APP_NAME} {APP_VERSION} (βeta)"
+APP_DISPLAY_NAME = f"{APP_NAME} {APP_VERSION}"
 
 # Remote Desktop Engine Hardcoded Values
 VD_WINDOW_ADJUST_RATIO = 90

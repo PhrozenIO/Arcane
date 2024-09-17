@@ -225,7 +225,7 @@ class TangentUniverse(QGraphicsView):
         elif Qt.Key.Key_F1 <= event.key() <= Qt.Key.Key_F12:
             key_text = self.parse_f_keys(event)
 
-            if event.modifiers() == Qt.KeyboardModifier.AltModifier:
+            if event.modifiers() == Qt.KeyboardModifier.AltModifier and key_text is not None:
                 key_text = "{%}" + key_text
                 is_shortcut = True
 

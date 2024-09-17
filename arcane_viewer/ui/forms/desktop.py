@@ -31,7 +31,7 @@ class DesktopWindow(QMainWindow):
     def __init__(self, connect_window: Union[QDialog, QMainWindow], session: arcane.Session) -> None:
         super().__init__()
 
-        self.show_fps = True
+        self.show_fps = False
 
         self.desktop_graphics_pixmap: Optional[QGraphicsPixmapItem] = None
         self.desktop_pixmap: Optional[QPixmap] = None
