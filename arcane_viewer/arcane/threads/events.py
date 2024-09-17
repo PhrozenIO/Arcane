@@ -104,12 +104,13 @@ class EventsThread(ClientBaseThread):
             )
 
     @pyqtSlot(str)
-    def send_key_event(self, keys: str) -> None:
+    def send_key_event(self, keys: str, is_shortcut: bool) -> None:
         """ Send keyboard event to the server """
         if self.client is not None and self._connected:
             self.client.write_json(
                 {
                     "Id": arcane.OutputEvent.Keyboard.name,
+                    "IsShortcut": is_shortcut,
                     "Keys": keys,
                 }
             )
