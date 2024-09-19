@@ -138,6 +138,7 @@ This release focuses on improving the code structure through extensive refactori
 Additionally, I extend my gratitude to those who contributed to enhancing the project's visibility:
 
 * [Laurent Minne](https://www.linkedin.com/in/laurent-minne/)
+* [Tristan Manzano](https://www.linkedin.com/in/tristan-manzano-963223103/)
 
 *If you share Arcane with your community, please feel free to contact me to be recognized in this section. I am very grateful to those who contribute by sharing my research and projects.*
 
