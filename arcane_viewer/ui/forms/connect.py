@@ -127,6 +127,9 @@ class ConnectWindow(utilities.QCenteredMainWindow):
 
     def keyPressEvent(self, event: Optional[QKeyEvent]) -> None:
         """ Handle certain key events like ESC to close the window or ENTER to submit default action """
+        if event is None:
+            return
+
         if event.key() == Qt.Key.Key_Return or event.key() == Qt.Key.Key_Enter:
             self.submit_form()
         elif event.key() == Qt.Key.Key_Escape:
