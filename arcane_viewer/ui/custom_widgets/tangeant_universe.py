@@ -218,7 +218,7 @@ class TangentUniverse(QGraphicsView):
         # Handle Ctrl + C, Ctrl + V, Ctrl + X etc.. CTRL + [A-Z]
         if (Qt.Key.Key_A <= event.key() <= Qt.Key.Key_Z) and \
                 event.modifiers() == Qt.KeyboardModifier.ControlModifier:
-            key_text = "{^}" + event.text().upper()
+            key_text = "{^}" + chr(event.key())
             is_shortcut = True
 
         # Handle [F1-F12] and/or ALT + [F1-F12]
