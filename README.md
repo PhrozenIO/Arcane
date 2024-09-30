@@ -39,12 +39,23 @@ The project was renamed to Arcane to avoid the generic nature of the previous na
 
 ## Quick Setup ([PyPi.org](https://pypi.org))
 
-The recommended way to install and launch the Arcane viewer is to first create a virtual environment. This can be done using **virtualenv** as follows:
+*Creating a virtual environment is recommended to avoid conflicts with other Python packages but is not required.*
 
 ```bash
 pip install virtualenv
 python -m venv venv
+```
+
+### macOS / Linux 
+
+```bash
 source venv/bin/activate
+```
+
+### Windows
+
+```bash
+.\venv\Scripts\activate
 ```
 
 You can either install the official package from PyPi.org:
@@ -71,10 +82,11 @@ For detailed instructions on how to use and configure the Arcane Server, please 
 
 ## Version Table
 
-| Version | Protocol Version | Release Date      | Compatible Servers |
-|---------|------------------|-------------------|--------------------|
+| Version | Protocol Version | Release Date      | Compatible Servers                                                    |
+|---------|------------------|-------------------|-----------------------------------------------------------------------|
 | 1.0.5b  | 5.0.1            | 22 August 2024    | [1.0.4](https://github.com/PhrozenIO/ArcaneServer/releases/tag/1-0-4) |
-| 1.0.6   | 5.0.2            | 17 September 2024 | |
+| 1.0.6   | 5.0.2            | 17 September 2024 | [1.0.5](https://github.com/PhrozenIO/ArcaneServer/releases/tag/1-0-5) |
+| 1.0.7   | 5.0.2            | 30 September 2024 | [1.0.5](https://github.com/PhrozenIO/ArcaneServer/releases/tag/1-0-5) |
 
 > ⓘ You can use any version of the viewer with any version of the server, as long as the protocol version matches. The protocol version ensures compatibility between the viewer and the server.
 
@@ -103,6 +115,12 @@ For detailed instructions on how to use and configure the Arcane Server, please 
 </p>
 
 ## Change Log
+
+### Version 1.0.7
+
+- **Mouse Positioning Fix:** Resolved an issue where the mouse position was incorrect when the remote desktop is smaller than the local desktop in mirror mode. The mouse is now accurately positioned across screens of different sizes.
+- **`CTRL+[A-Z]` Shortcut Fix for Windows:** Fixed a bug on the Windows client where `CTRL + [A-Z]` keyboard shortcuts were not functioning properly. Shortcuts are now correctly processed.
+- **Connection Window Enhancements:** Pressing ESC on the connection window now closes the application. Pressing ENTER or RETURN starts the connection process immediately.
 
 ### Version 1.0.6
 
