@@ -70,15 +70,8 @@ class TangentUniverse(QGraphicsView):
         if self.desktop_screen is None:
             return x, y
 
-        if self.desktop_screen.width > self.width():
-            x_ratio = self.desktop_screen.width / self.width()
-        else:
-            x_ratio = self.width() / self.desktop_screen.width
-
-        if self.desktop_screen.height > self.height():
-            y_ratio = self.desktop_screen.height / self.height()
-        else:
-            y_ratio = self.height() / self.desktop_screen.height
+        x_ratio = self.desktop_screen.width / self.width()
+        y_ratio = self.desktop_screen.height / self.height()
 
         # We must take in account both virtual desktop size and original screen X, Y position.
         return (self.desktop_screen.x + (x * x_ratio),
@@ -218,7 +211,7 @@ class TangentUniverse(QGraphicsView):
         # Handle Ctrl + C, Ctrl + V, Ctrl + X etc.. CTRL + [A-Z]
         if (Qt.Key.Key_A <= event.key() <= Qt.Key.Key_Z) and \
                 event.modifiers() == Qt.KeyboardModifier.ControlModifier:
-            key_text = "{^}" + event.text().upper()
+            key_text = "{^}" + chr(event.key())
             is_shortcut = True
 
         # Handle [F1-F12] and/or ALT + [F1-F12]
