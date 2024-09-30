@@ -25,7 +25,7 @@ else:
 
 
 # Application Information
-APP_VERSION = "1.0.6"
+APP_VERSION = "1.0.7"
 APP_NAME = "Arcane"
 APP_ORGANIZATION_NAME = "Phrozen"
 APP_DISPLAY_NAME = f"{APP_NAME} {APP_VERSION}"
