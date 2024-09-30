@@ -5,6 +5,7 @@
 venv/
 .tox/
 dist/
+build/
 *.egg-info/
 *.pyc
 arcane_viewer/assets/default.json
