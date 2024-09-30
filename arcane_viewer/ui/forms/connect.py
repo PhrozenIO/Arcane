@@ -10,7 +10,7 @@ import socket
 from typing import Optional
 
 from PyQt6.QtCore import QSettings, QSize, Qt, pyqtSlot
-from PyQt6.QtGui import QIcon
+from PyQt6.QtGui import QIcon, QKeyEvent
 from PyQt6.QtWidgets import (QDialog, QHBoxLayout, QLabel, QLineEdit,
                              QMessageBox, QPushButton, QSpinBox, QVBoxLayout,
                              QWidget)
@@ -124,6 +124,15 @@ class ConnectWindow(utilities.QCenteredMainWindow):
         self.read_default()
 
         self.adjust_size()
+
+    def keyPressEvent(self, event: Optional[QKeyEvent]) -> None:
+        """ Handle certain key events like ESC to close the window or ENTER to submit default action """
+        if event.key() == Qt.Key.Key_Return or event.key() == Qt.Key.Key_Enter:
+            self.submit_form()
+        elif event.key() == Qt.Key.Key_Escape:
+            self.close()
+
+        super().keyPressEvent(event)
 
     def read_default(self) -> None:
         """ Read default settings from the default.json file """
