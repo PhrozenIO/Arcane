@@ -157,6 +157,8 @@ Additionally, I extend my gratitude to those who contributed to enhancing the pr
 
 * [Laurent Minne](https://www.linkedin.com/in/laurent-minne/)
 * [Tristan Manzano](https://www.linkedin.com/in/tristan-manzano-963223103/)
+* [Matthieu BILLAUX (Euz)](https://www.linkedin.com/in/matthieubillaux/)
+* [Manuel Dorne (Korben)](https://www.linkedin.com/in/korben/)
 
 *If you share Arcane with your community, please feel free to contact me to be recognized in this section. I am very grateful to those who contribute by sharing my research and projects.*
 
